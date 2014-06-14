@@ -72,6 +72,17 @@ function loadFragments(listOfFragments){
 	}
 }
 
+//Удаляем фрагменты карт
+function removeFragments(){
+	$('#' + idElement).find('img').each(function(){
+		var x = parseInt($(this).css('left'));
+		var y = parseInt($(this).css('top'));
+		if(x < 0-distanceForLostFragments-sizeOfFragment || x > mapWidth+distanceForLostFragments || y < 0-distanceForLostFragments-sizeOfFragment || y > mapHeight+distanceForLostFragments){
+			$(this).remove();
+		}
+	});
+}
+
 //Скроллинг карты
 function scrollMap(event){
 	//Координаты клика
@@ -97,6 +108,10 @@ function scrollMap(event){
 				var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
 				//Загружаем фрагменты карт
 				loadFragments(listOfFragments);
+				//Удаляем фрагменты карт
+				if(removeLostFragmens){
+					removeFragments();
+				}
 				timeoutLoader = null;
 			},300);
 		}

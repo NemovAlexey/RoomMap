@@ -11,6 +11,12 @@ var scales = {
 	'100': [3.57142857, sizeOfFragment*3.57142857]
 }
 
+//Удалять ли фрагменты покинувшие видимую зону
+var removeLostFragmens = true;
+
+//Расстояние от края карты до удаляемого фрагмента
+var distanceForLostFragments = 100;
+
 //Режим демонстрации
 var demoMode = 'off';
 
