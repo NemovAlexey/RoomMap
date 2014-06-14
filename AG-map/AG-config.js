@@ -15,7 +15,7 @@ var scales = {
 var removeLostFragmens = true;
 
 //Расстояние от края карты до удаляемого фрагмента
-var distanceForLostFragments = 100;
+var distanceForLostFragments = 300;
 
 //Режим демонстрации
 var demoMode = 'off';

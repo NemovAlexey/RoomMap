@@ -108,10 +108,6 @@ function scrollMap(event){
 				var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
 				//Загружаем фрагменты карт
 				loadFragments(listOfFragments);
-				//Удаляем фрагменты карт
-				if(removeLostFragmens){
-					removeFragments();
-				}
 				timeoutLoader = null;
 			},300);
 		}
@@ -125,6 +121,10 @@ function scrollMap(event){
 function scrollMapCancel(){
 	$().unbind('mousemove');
 	$('#' + idElement).removeClass('scrolledmap');
+	//Удаляем фрагменты карт
+	if(removeLostFragmens){
+		removeFragments();
+	}
 	updateUrl(position_X,position_Y);
 }
 
