@@ -1,6 +1,6 @@
 //Размеры блока
-var mapWidth = 1000;
-var mapHeight = 600;
+var mapWidth = 800;
+var mapHeight = 400;
 
 //Размер фрагмента карты
 var sizeOfFragment = 150;

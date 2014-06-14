@@ -57,8 +57,8 @@ function loadFragments(listOfFragments){
 		var posY = listOfFragments[i][1] < 1 ? (mapHeight/2) + sizeOfFragment*Math.abs(listOfFragments[i][1]) - sizeOfFragment : (mapHeight/2) - sizeOfFragment*listOfFragments[i][1];
 
 		//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
-		$(newFragment).css('left', posX + (position_X/scales[scale][0] * -1) + 'px');
-		$(newFragment).css('top', posY + (position_Y/scales[scale][0]) + 'px');
+		$(newFragment).css('left', posX + Math.round(Math.round(position_X)/scales[scale][0] * -1) + 'px');
+		$(newFragment).css('top', posY + Math.round(Math.round(position_Y)/scales[scale][0]) + 'px');
 		
 		//Обработчик, плавное появление фрагмента после загрузки
 		$(newFragment).one('load',function(){
@@ -77,6 +77,8 @@ function scrollMap(event){
 	//Координаты клика
 	var default_X = event.clientX;
 	var default_Y = event.clientY;
+	
+	$(this).addClass('scrolledmap');
 	
 	//Обработчик движения мыши
 	$().bind('mousemove',function(event){
@@ -107,6 +109,7 @@ function scrollMap(event){
 //Заканчиваем скролл карты
 function scrollMapCancel(){
 	$().unbind('mousemove');
+	$('#' + idElement).removeClass('scrolledmap');
 	updateUrl(position_X,position_Y);
 }
 
@@ -119,13 +122,18 @@ function updateUrl(x,y){
 	if(l){
 		params = l.substring(1).split('&');
 		$.each(params,function(index,value){/* alert(value); */
-			if(!value.match(/^x=[-0-9]+$/,'') && !value.match(/^y=[-0-9]+$/,'')){
+			if(!value.match(/^x=[-0-9\.e]+$/,'') && !value.match(/^y=[-0-9\.e]+$/,'')){
 				newParams.push(value);
 			}
 		})
 	}
 
-	newParams.push('x=' + parseInt(x));
-	newParams.push('y=' + parseInt(y));
+	newParams.push('x=' + x);
+	newParams.push('y=' + y);
 	history.pushState(null,null,location.pathname + '?' + newParams.join('&'));
 }
+
+//Отключаем скролл при отпускании кнопки мыше вне карты
+$().ready(function(){
+	$().mouseup(scrollMapCancel);
+});

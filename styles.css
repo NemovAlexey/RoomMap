@@ -2,9 +2,9 @@
 	border: 1px solid black;
 }
 
-
-/* Удалить в конце */
-.fragmentOfMaps {
-	display: inline;
-	position: absolute; 
+.scrolledmap {
+  cursor:hand;
+  cursor:grab;
+  cursor:-moz-grab;
+  cursor:-webkit-grab;
 }
