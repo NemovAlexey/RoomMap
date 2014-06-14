@@ -1,3 +1,5 @@
+var timeoutLoader = null;
+
 //Инициализация карты
 function initMap(){
 	$('#' + idElement).css({
@@ -42,10 +44,13 @@ function getListOfFragments(position_X, position_Y, mapWidth, mapHeight){
 //Загрузка фрагментов карты
 function loadFragments(listOfFragments){
 	for(var i = 0; i < listOfFragments.length; i++){
-
+		//Если фрагмент загружен снова его грузить не надо
+		if($('#fr' + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
+	
 		var newFragment = new Image();
 		newFragment.src = pathForFragments + '/' + scale + '/' + listOfFragments[i][0] + '&' + listOfFragments[i][1] + '.jpg';
 		$(newFragment).css({position: 'absolute', opacity: '0'});
+		$(newFragment).attr('id','fr' + listOfFragments[i][0] + listOfFragments[i][1]);
 		
 		//Позиция относительно центра координат
 		var posX = listOfFragments[i][0] < 1 ? (mapWidth/2) - sizeOfFragment*Math.abs(listOfFragments[i][0]) : (mapWidth/2) + sizeOfFragment*listOfFragments[i][0] - sizeOfFragment;
@@ -84,7 +89,16 @@ function scrollMap(event){
 		
 		position_X = position_X + (default_X - current_X)*scales[scale][0];
 		position_Y = position_Y - (default_Y - current_Y)*scales[scale][0];
-				
+			
+		if(!timeoutLoader){
+			timeoutLoader = setTimeout(function(){
+				var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
+				//Загружаем фрагменты карт
+				loadFragments(listOfFragments);
+				timeoutLoader = null;
+			},300);
+		}
+		
 		default_X = event.clientX;
 		default_Y = event.clientY;
 	});
