@@ -9,7 +9,15 @@ function initMap(){
 	});
 
 	var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
+	//Загружаем фрагменты карт
 	loadFragments(listOfFragments);
+	//Обработчик, плавное появление фрагмента после загрузки
+	$('#' + idElement).find('img').load(function(){
+		$(this).animate({opacity:'1'});
+	}).mousedown(function(event){
+		//Запрещаем перетаскивание фрагментов карты
+		event.preventDefault();
+	});;	
 }
 
 //Определение необходимых к загрузке фрагментов
@@ -41,12 +49,16 @@ function loadFragments(listOfFragments){
 		var newFragment = new Image();
 		newFragment.src = pathForFragments + scale + '/' + listOfFragments[i][0] + '&' + listOfFragments[i][1] + '.jpg';
 		$(newFragment).css('position','absolute');
+		$(newFragment).css('opacity', '0');
 		
+		//Позиция относительно центра координат
 		var posX = listOfFragments[i][0] < 1 ? (mapWidth/2) - sizeOfFragment*Math.abs(listOfFragments[i][0]) : (mapWidth/2) + sizeOfFragment*listOfFragments[i][0] - sizeOfFragment;
 		var posY = listOfFragments[i][1] < 1 ? (mapHeight/2) + sizeOfFragment*Math.abs(listOfFragments[i][1]) - sizeOfFragment : (mapHeight/2) - sizeOfFragment*listOfFragments[i][1];
+
+		//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
+		$(newFragment).css('left', posX + (position_X/scales[scale][0] * -1) + 'px');
+		$(newFragment).css('top', posY + (position_Y/scales[scale][0]) + 'px');
 		
-		$(newFragment).css('left', posX + 'px');
-		$(newFragment).css('top', posY + 'px');
 		$('#' + idElement).append(newFragment);
 	}
 }
