@@ -1,0 +1,10 @@
+#AG-map {
+	border: 1px solid black;
+}
+
+
+/* Удалить в конце */
+.fragmentOfMaps {
+	display: inline;
+	position: absolute; 
+}
