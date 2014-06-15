@@ -9,6 +9,9 @@ function initMap(){
 		position: 'absolute',
 		background: 'url(/images/backgroundmap.jpg)'
 	});
+	
+	//Установим лого
+	$('<div class="logo"></div>').appendTo('#' + idElement);
 
 	var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
 	//Загружаем фрагменты карт
@@ -44,7 +47,7 @@ function getListOfFragments(position_X, position_Y, mapWidth, mapHeight){
 //Загрузка фрагментов карты
 function loadFragments(listOfFragments){
 	for(var i = 0; i < listOfFragments.length; i++){
-		//Если фрагмент загружен снова его грузить не надо
+		//Если фрагмент загружен, снова его грузить не надо
 		if($('#fr' + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
 	
 		var newFragment = new Image();
@@ -59,6 +62,7 @@ function loadFragments(listOfFragments){
 		//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
 		$(newFragment).css('left', posX + Math.round(Math.round(position_X)/scales[scale][0] * -1) + 'px');
 		$(newFragment).css('top', posY + Math.round(Math.round(position_Y)/scales[scale][0]) + 'px');
+		$(newFragment).addClass('FrMainMap');
 		
 		//Обработчик, плавное появление фрагмента после загрузки
 		$(newFragment).one('load',function(){

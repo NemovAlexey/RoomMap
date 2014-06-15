@@ -1,6 +1,6 @@
 //Размеры блока
-var mapWidth = 800;
-var mapHeight = 400;
+var mapWidth = 1000;
+var mapHeight = 600;
 
 //Размер фрагмента карты
 var sizeOfFragment = 150;
@@ -24,7 +24,7 @@ var demoMode = 'off';
 var tools = 'off';
 
 //ID элемента для инициализации карты
-var idElement = 'AG-map';
+var idElement = 'Room-map';
 
 //Путь к папке с фрагментами
 var pathForFragments = '/maps';

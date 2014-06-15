@@ -1,5 +1,19 @@
-#AG-map {
+#Room-map {
 	border: 1px solid black;
+}
+
+#Room-map .logo {
+	width: 122px;
+	height: 51px;
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	background: url(/images/logo.png);
+	z-index: 2;
+}
+
+#Room-map .FrMainMap{
+	z-index: 1
 }
 
 .scrolledmap {
@@ -8,3 +22,4 @@
   cursor:-moz-grab;
   cursor:-webkit-grab;
 }
+
