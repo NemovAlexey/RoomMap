@@ -1,6 +1,6 @@
 //Размеры блока
-var mapWidth = 1000;
-var mapHeight = 600;
+var mapWidth = 800;
+var mapHeight = 500;
 
 //Размер фрагмента карты
 var sizeOfFragment = 150;
@@ -10,6 +10,8 @@ var scales = {
 	//См карты в одном пикселе, отображаемая длина фрагмента
 	'100': [3.57142857, sizeOfFragment*3.57142857]
 }
+//Расстояние от края карты до загружаемого фрагмента
+var distanceForNewFragments = 0;
 
 //Удалять ли фрагменты покинувшие видимую зону
 var removeLostFragmens = true;

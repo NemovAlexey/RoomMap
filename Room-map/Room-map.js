@@ -26,11 +26,11 @@ function initMap(){
 function getListOfFragments(position_X, position_Y, mapWidth, mapHeight){
 	//Определим в каких фрагментах находятся нижний левый и правый верхний углы
 	//Нижний левый угол
-	var xMin = ((position_X - (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) < 0 ? Math.floor((position_X - (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) : Math.ceil((position_X - (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0]));
-	var yMin = ((position_Y - (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) < 0 ? Math.floor((position_Y - (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) : Math.ceil((position_Y - (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0]));
+	var xMin = ((position_X - ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) < 0 ? Math.floor((position_X - ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) : Math.ceil((position_X - ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]);
+	var yMin = ((position_Y - ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) < 0 ? Math.floor((position_Y - ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) : Math.ceil((position_Y - ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]);
 	//Правый верхний угол
-	var xMax = ((position_X + (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) < 0 ? Math.floor((position_X + (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) : Math.ceil((position_X + (mapWidth * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0]));
-	var yMax = ((position_Y + (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) < 0 ? Math.floor((position_Y + (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0])) : Math.ceil((position_Y + (mapHeight * scales[scale][0]/2))/(sizeOfFragment * scales[scale][0]));
+	var xMax = ((position_X + ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) < 0 ? Math.floor((position_X + ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) : Math.ceil((position_X + ((mapWidth + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]);
+	var yMax = ((position_Y + ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) < 0 ? Math.floor((position_Y + ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]) : Math.ceil((position_Y + ((mapHeight + distanceForNewFragments) * scales[scale][0]/2))/scales[scale][1]);
 	
 	//Составим список фрагментов
 	var fragments = [];
