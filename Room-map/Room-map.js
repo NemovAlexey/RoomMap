@@ -1,3 +1,4 @@
+var RoomMap = {};
 var timeoutLoader = null;
 
 //Инициализация карты
@@ -12,6 +13,8 @@ function initMap(){
 	
 	//Установим лого
 	$('<div class="logo"></div>').appendTo('#' + idElement);
+	//Кнопка "слои"
+	$('<div class="layers" title="' + RoomMap.Langs[lang].layers + '"></div>').appendTo('#' + idElement);
 
 	var listOfFragments = getListOfFragments(position_X, position_Y, mapWidth, mapHeight);
 	//Загружаем фрагменты карт

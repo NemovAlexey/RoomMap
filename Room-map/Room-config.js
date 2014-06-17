@@ -30,3 +30,6 @@ var idElement = 'Room-map';
 
 //Путь к папке с фрагментами
 var pathForFragments = '/maps';
+
+//Язык интерефейса
+var lang = 'rus';

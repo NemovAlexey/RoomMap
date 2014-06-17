@@ -12,6 +12,21 @@
 	z-index: 2;
 }
 
+#Room-map .layers {
+	width: 32px;
+	height: 32px;
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	background: url(/images/layers_a.png);
+	z-index: 2;
+	cursor: pointer;
+}
+
+#Room-map .layers:hover{
+	background: url(/images/layers.png);
+}
+
 #Room-map .FrMainMap{
 	z-index: 1
 }
