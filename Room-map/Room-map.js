@@ -1,43 +1,38 @@
 var RoomMap = {
 	timeoutLoader: null,
-
-	//Подготовка к инициализации
-	preInitMap: function(){
+	
+	//Инициализация карты
+	initMapTo: function (idElement){
+		RoomMap.idElement = idElement;
 		//Подключаем файлы
 		RoomMap.includeFiles();
+		//Ждем загрузки документа
 		window.onload = function(){
-			RoomMap.initMap();
+			$('#' + RoomMap.idElement).css({
+				width: RoomMap.mapWidth + 'px',
+				height: RoomMap.mapHeight + 'px'
+			}).addClass('mapBlock');
+			
+			//Установим лого
+			$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
+			
+			//Загружаем инструменты
+			if(RoomMap.tools == 'on'){
+				RoomMap.LoadTools();
+			}
+			
+			//Определяем список фрагментов
+			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
+			//Загружаем фрагменты карт
+			RoomMap.loadFragments(listOfFragments);
+			
+			//Обработчик нажатия на карту левой кнопкой мыши
+			$('#' + RoomMap.idElement).mousedown(RoomMap.scrollMap);
+			$('#' + RoomMap.idElement).mouseup(RoomMap.scrollMapCancel);
+			
 			//Отключаем скролл при отпускании кнопки мыши вне карты
 			$().mouseup(RoomMap.scrollMapCancel);
 		}
-	},
-	
-	//Инициализация карты
-	initMap: function (){
-		$('#' + RoomMap.idElement).css({
-			width: RoomMap.mapWidth + 'px',
-			height: RoomMap.mapHeight + 'px',
-			overflow: 'hidden',
-			position: 'absolute',
-			background: 'url(/images/backgroundmap.jpg)'
-		});
-		
-		//Установим лого
-		$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
-		
-		//Загружаем инструменты
-		if(RoomMap.tools == 'on'){
-			RoomMap.LoadTools();
-		}
-		
-		//Определяем список фрагментов
-		var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
-		//Загружаем фрагменты карт
-		RoomMap.loadFragments(listOfFragments);
-		
-		//Обработчик нажатия на карту левой кнопкой мыши
-		$('#' + RoomMap.idElement).mousedown(RoomMap.scrollMap);
-		$('#' + RoomMap.idElement).mouseup(RoomMap.scrollMapCancel);
 	},
 
 	//Определение необходимых к загрузке фрагментов

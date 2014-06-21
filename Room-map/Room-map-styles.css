@@ -1,8 +1,11 @@
-#Room-map {
+.mapBlock {
 	border: 1px solid black;
+	overflow: hidden;
+	position: absolute;
+	background: url(/images/backgroundmap.jpg)
 }
 
-#Room-map .logo {
+.logo {
 	width: 122px;
 	height: 51px;
 	position: absolute;
@@ -12,7 +15,7 @@
 	z-index: 2;
 }
 
-#Room-map .layers {
+.layers {
 	width: 32px;
 	height: 32px;
 	position: absolute;
@@ -23,11 +26,11 @@
 	cursor: pointer;
 }
 
-#Room-map .layers:hover{
+.layers:hover{
 	background: url(/images/layers.png);
 }
 
-#Room-map .FrMainMap{
+.FrMainMap{
 	z-index: 1
 }
 

@@ -9,8 +9,8 @@
 		<script type="text/javascript">
 			RoomMap.position_X = <?= (float)$_GET['x']; ?>;
 			RoomMap.position_Y = <?= (float)$_GET['y']; ?>;
-			RoomMap.scale = 100;
-			RoomMap.preInitMap();
+			RoomMap.scale = <?= $_GET['s'] ? $_GET['s'] : 100 ?>;
+			RoomMap.initMapTo('Room-map');
 		</script>
  	</head>
 	<body>

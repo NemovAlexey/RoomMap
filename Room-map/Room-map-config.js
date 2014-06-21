@@ -25,9 +25,6 @@ RoomMap.demoMode = 'off';
 //Кнопки управления
 RoomMap.tools = 'on';
 
-//ID элемента для инициализации карты
-RoomMap.idElement = 'Room-map';
-
 //Путь к папке с фрагментами
 RoomMap.pathForFragments = '/maps';
 
