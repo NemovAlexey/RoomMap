@@ -1,5 +1,7 @@
 var RoomMap = {
 	timeoutLoader: null,
+	//Матрица состояния загружаемых файлов
+	LoadMatrix: [0],
 	
 	//Инициализация карты
 	initMapTo: function (idElement){
@@ -8,33 +10,47 @@ var RoomMap = {
 		RoomMap.includeFiles();
 		//Ждем загрузки документа
 		window.onload = function(){
-			$('#' + RoomMap.idElement).css({
-				width: RoomMap.mapWidth + 'px',
-				height: RoomMap.mapHeight + 'px'
-			}).addClass('mapBlock');
-			
-			//Установим лого
-			$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
-			
-			//Загружаем инструменты
-			if(RoomMap.tools == 'on'){
-				RoomMap.LoadTools();
-			}
-			
-			//Определяем список фрагментов
-			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
-			//Загружаем фрагменты карт
-			RoomMap.loadFragments(listOfFragments);
-			
-			//Обработчик нажатия на карту левой кнопкой мыши
-			$('#' + RoomMap.idElement).mousedown(RoomMap.scrollMap);
-			$('#' + RoomMap.idElement).mouseup(RoomMap.scrollMapCancel);
-			
-			//Отключаем скролл при отпускании кнопки мыши вне карты
-			$().mouseup(RoomMap.scrollMapCancel);
+			//Подключаем зависимые файлы
+			RoomMap.includeDependentFiles();
+			//Ждем загрузки всех зависимых файлов
+			RoomMap.timeoutLoader = setInterval(function(){
+				for(var i = 0; i < RoomMap.LoadMatrix.length; i++){
+					if(RoomMap.LoadMatrix[i] == 0) break;
+				}
+				RoomMap.createMap();
+				clearInterval(RoomMap.timeoutLoader);
+				RoomMap.timeoutLoader = null;
+			},100);
 		}
 	},
 
+	createMap: function(){
+		$('#' + RoomMap.idElement).css({
+			width: RoomMap.mapWidth + 'px',
+			height: RoomMap.mapHeight + 'px'
+		}).addClass('mapBlock');
+
+		//Установим лого
+		$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
+
+		//Загружаем инструменты
+		if(RoomMap.tools == 'on'){
+			RoomMap.LoadTools();
+		}
+
+		//Определяем список фрагментов
+		var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
+		//Загружаем фрагменты карт
+		RoomMap.loadFragments(listOfFragments);
+
+		//Обработчик нажатия на карту левой кнопкой мыши
+		$('#' + RoomMap.idElement).mousedown(RoomMap.scrollMap);
+		$('#' + RoomMap.idElement).mouseup(RoomMap.scrollMapCancel);
+
+		//Отключаем скролл при отпускании кнопки мыши вне карты
+		$().mouseup(RoomMap.scrollMapCancel);
+	},
+	
 	//Определение необходимых к загрузке фрагментов
 	getListOfFragments: function(position_X, position_Y, mapWidth, mapHeight){
 		//Определим в каких фрагментах находятся нижний левый и правый верхний углы
@@ -169,17 +185,12 @@ var RoomMap = {
 	includeFiles: function(){
 		var newScript = document.createElement('script');
 		newScript.type = 'text/javascript';
-		newScript.src = '/Room-map/Jquery.js';
-		document.getElementsByTagName('head')[0].appendChild(newScript);
-
-		var newScript = document.createElement('script');
-		newScript.type = 'text/javascript';
 		newScript.src = '/Room-map/Room-map-config.js';
 		document.getElementsByTagName('head')[0].appendChild(newScript);
-
+		
 		var newScript = document.createElement('script');
 		newScript.type = 'text/javascript';
-		newScript.src = '/Room-map/Langs/Room-map-langs.js';
+		newScript.src = '/Room-map/Jquery.js';
 		document.getElementsByTagName('head')[0].appendChild(newScript);
 
 		var newLink = document.createElement('link');
@@ -189,8 +200,17 @@ var RoomMap = {
 		document.getElementsByTagName('head')[0].appendChild(newLink);		
 	},
 	
+	//Загрузка зависимых от загружаемых ранее файлов
+	includeDependentFiles: function(){
+		var newScript = document.createElement('script');
+		newScript.type = 'text/javascript';
+		newScript.src = '/Room-map/Langs/' + RoomMap.lang + '.js';
+		newScript.onload = function(){RoomMap.LoadMatrix[0] = 1;}
+		document.getElementsByTagName('head')[0].appendChild(newScript);
+	},
+	
 	LoadTools: function(){
 		//Кнопка "слои"
-		$('<div class="layers" title="' + RoomMap.Langs[RoomMap.lang].layers + '"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="layers" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement);
 	}
 }

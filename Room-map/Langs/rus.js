@@ -1,0 +1,3 @@
+RoomMap.Langs = {
+	layers: 'Слои'
+}
