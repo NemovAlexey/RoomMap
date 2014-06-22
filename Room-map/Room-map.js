@@ -34,7 +34,7 @@ var RoomMap = {
 		$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
 
 		//Загружаем инструменты
-		if(RoomMap.tools == 'on'){
+		if(RoomMap.tools){
 			RoomMap.LoadTools();
 		}
 
@@ -123,18 +123,61 @@ var RoomMap = {
 		var default_Y = event.clientY;
 		
 		$(this).addClass('scrolledmap');
-		
+
 		//Обработчик движения мыши
 		$().bind('mousemove',function(event){
 			var current_X = event.clientX;
 			var current_Y = event.clientY;
-			$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
-				$(fragment).css('top',parseInt($(this).css('top')) - (default_Y - current_Y) + 'px');
-				$(fragment).css('left',parseInt($(this).css('left')) - (default_X - current_X) + 'px');
-			});
 			
-			RoomMap.position_X = RoomMap.position_X + (default_X - current_X) * RoomMap.scales[RoomMap.scale][0];
-			RoomMap.position_Y = RoomMap.position_Y - (default_Y - current_Y) * RoomMap.scales[RoomMap.scale][0];
+			var dY = default_Y - current_Y;
+			var dX = default_X - current_X;
+			
+			//Предотвращение побега
+			if(RoomMap.preventEscape){
+				//По горизонтали
+				if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
+					//Из-за погрешности вычислений используем диапазон
+					if(RoomMap.position_X > (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+						dX = 0;
+					}else{
+						dX = Math.ceil(((-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
+					}
+				}
+				else if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
+					//Из-за погрешности вычислений используем диапазон
+					if(RoomMap.position_X > (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+						dX = 0;
+					}else{
+						dX = Math.floor(((RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
+					}
+				}
+				//По вертикали
+				if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
+					//Из-за погрешности вычислений используем диапазон
+					if(RoomMap.position_Y > (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+						dY = 0;
+					}else{
+						dY = -Math.floor(((RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
+					}
+				}
+				else if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
+					//Из-за погрешности вычислений используем диапазон
+					if(RoomMap.position_Y > (RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+						dY = 0;
+					}else{
+						dY = -Math.ceil(((-RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
+					}
+				}
+
+			}
+			
+			RoomMap.position_X = RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0];
+			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
+			
+			$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
+				$(fragment).css('top',parseInt($(this).css('top')) - (dY) + 'px');
+				$(fragment).css('left',parseInt($(this).css('left')) - (dX) + 'px');
+			});
 				
 			if(!RoomMap.timeoutLoader){
 				RoomMap.timeoutLoader = setTimeout(function(){

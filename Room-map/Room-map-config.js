@@ -10,6 +10,11 @@ RoomMap.scales = {
 	//См карты в одном пикселе, отображаемая длина фрагмента
 	'100': [3.57142857, RoomMap.sizeOfFragment*3.57142857]
 }
+
+//Размер карты в фрагментах от центра (по часовой стрелке)
+//Используется для ограничения загрузки фрагментов и предотвращения побега
+RoomMap.size = [5,6,5,6];
+
 //Расстояние от края карты до загружаемого фрагмента в пикс.
 RoomMap.distanceForNewFragments = 0;
 
@@ -17,13 +22,13 @@ RoomMap.distanceForNewFragments = 0;
 RoomMap.removeLostFragmens = true;
 
 //Расстояние от края карты до удаляемого фрагмента в пикс.
-RoomMap.distanceForLostFragments = 300;
+RoomMap.distanceForLostFragments = 0;
 
-//Режим демонстрации
-RoomMap.demoMode = 'off';
+//Блокировать выход за края карты
+RoomMap.preventEscape = true;
 
 //Кнопки управления
-RoomMap.tools = 'on';
+RoomMap.tools = true;
 
 //Путь к папке с фрагментами
 RoomMap.pathForFragments = '/maps';
