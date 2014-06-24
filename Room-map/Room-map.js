@@ -78,6 +78,10 @@ var RoomMap = {
 		for(var i = 0; i < listOfFragments.length; i++){
 			//Если фрагмент загружен, снова его грузить не надо
 			if($('#fr' + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
+			//Загружать фрагменты ограниченные размером карты
+			if(RoomMap.loadFragmentsForSize){
+				if(listOfFragments[i][0] > RoomMap.size[1] || listOfFragments[i][0] < -RoomMap.size[3] || listOfFragments[i][1] > RoomMap.size[0] || listOfFragments[i][1] < -RoomMap.size[2]) continue
+			}
 		
 			var newFragment = new Image();
 			newFragment.src = RoomMap.pathForFragments + '/' + RoomMap.scale + '/' + listOfFragments[i][0] + '&' + listOfFragments[i][1] + '.jpg';

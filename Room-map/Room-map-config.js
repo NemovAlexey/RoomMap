@@ -15,14 +15,17 @@ RoomMap.scales = {
 //Используется для ограничения загрузки фрагментов и предотвращения побега
 RoomMap.size = [5,6,5,6];
 
+//Ограничение загрузки фрагментов по размеру карты
+RoomMap.loadFragmentsForSize = true;
+
 //Расстояние от края карты до загружаемого фрагмента в пикс.
-RoomMap.distanceForNewFragments = 0;
+RoomMap.distanceForNewFragments = 200;
 
 //Удалять ли фрагменты покинувшие видимую зону
 RoomMap.removeLostFragmens = true;
 
 //Расстояние от края карты до удаляемого фрагмента в пикс.
-RoomMap.distanceForLostFragments = 0;
+RoomMap.distanceForLostFragments = 300;
 
 //Блокировать выход за края карты
 RoomMap.preventEscape = true;
