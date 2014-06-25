@@ -2,6 +2,9 @@
 RoomMap.mapWidth = 800;
 RoomMap.mapHeight = 500;
 
+//На весь экран
+RoomMap.fullScreen = true;
+
 //Размер фрагмента карты
 RoomMap.sizeOfFragment = 150;
 
@@ -19,13 +22,13 @@ RoomMap.size = [5,6,5,6];
 RoomMap.loadFragmentsForSize = true;
 
 //Расстояние от края карты до загружаемого фрагмента в пикс.
-RoomMap.distanceForNewFragments = 200;
+RoomMap.distanceForNewFragments = 0;
 
 //Удалять ли фрагменты покинувшие видимую зону
 RoomMap.removeLostFragmens = true;
 
 //Расстояние от края карты до удаляемого фрагмента в пикс.
-RoomMap.distanceForLostFragments = 300;
+RoomMap.distanceForLostFragments = 0;
 
 //Блокировать выход за края карты
 RoomMap.preventEscape = true;

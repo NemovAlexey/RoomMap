@@ -25,6 +25,23 @@ var RoomMap = {
 	},
 
 	createMap: function(){
+		//Если на весь экран
+		if(RoomMap.fullScreen){
+			$('body').css({margin:'0px'});
+			RoomMap.mapWidth = document.body.scrollWidth;
+			RoomMap.mapHeight = document.body.scrollHeight;
+			//Обработка изменения размера окна
+			$(window).resize(function(){
+				RoomMap.mapWidth = window.innerWidth;
+				RoomMap.mapHeight = window.innerHeight;
+				$('#' + RoomMap.idElement).css({
+					width: RoomMap.mapWidth + 'px',
+					height: RoomMap.mapHeight + 'px'
+				})
+			})
+		}
+	
+		//Установка размеров карты
 		$('#' + RoomMap.idElement).css({
 			width: RoomMap.mapWidth + 'px',
 			height: RoomMap.mapHeight + 'px'
