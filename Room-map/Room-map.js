@@ -28,8 +28,8 @@ var RoomMap = {
 		//Если на весь экран
 		if(RoomMap.fullScreen){
 			$('body').css({margin:'0px'});
-			RoomMap.mapWidth = document.body.scrollWidth;
-			RoomMap.mapHeight = document.body.scrollHeight;
+			RoomMap.mapWidth = window.innerWidth;
+			RoomMap.mapHeight = window.innerHeight;
 			//Обработка изменения размера окна
 			$(window).resize(function(){
 				var dY = (RoomMap.mapHeight - window.innerHeight)/2;
