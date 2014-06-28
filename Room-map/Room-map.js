@@ -32,12 +32,30 @@ var RoomMap = {
 			RoomMap.mapHeight = document.body.scrollHeight;
 			//Обработка изменения размера окна
 			$(window).resize(function(){
+				var dY = (RoomMap.mapHeight - window.innerHeight)/2;
+				var dX = (RoomMap.mapWidth - window.innerWidth)/2;
+				
+				//Корректируем координаты центра, если требуется
+				if(dX != Math.round(dX)){
+					RoomMap.position_X = RoomMap.position_X - (dX - Math.round(dX))*RoomMap.scales[RoomMap.scale][0];
+				}
+				if(dY != Math.round(dY)){
+					RoomMap.position_Y = RoomMap.position_Y + (dY - Math.round(dY))*RoomMap.scales[RoomMap.scale][0];
+				}
+				RoomMap.updateUrl(RoomMap.position_X,RoomMap.position_Y);
+				
+				//Сдвигаем фрагменты карт
 				RoomMap.mapWidth = window.innerWidth;
 				RoomMap.mapHeight = window.innerHeight;
 				$('#' + RoomMap.idElement).css({
 					width: RoomMap.mapWidth + 'px',
 					height: RoomMap.mapHeight + 'px'
 				})
+				
+				$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
+					$(fragment).css('top',parseInt($(this).css('top')) -  Math.ceil(dY) + 'px');
+					$(fragment).css('left',parseInt($(this).css('left')) - Math.ceil(dX) + 'px');
+				});
 			})
 		}
 	
@@ -106,12 +124,12 @@ var RoomMap = {
 			$(newFragment).attr('id','fr' + listOfFragments[i][0] + listOfFragments[i][1]);
 			
 			//Позиция относительно центра координат
-			var posX = listOfFragments[i][0] < 1 ? (RoomMap.mapWidth/2) - RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][0]) : (RoomMap.mapWidth/2) + RoomMap.sizeOfFragment*listOfFragments[i][0] - RoomMap.sizeOfFragment;
-			var posY = listOfFragments[i][1] < 1 ? (RoomMap.mapHeight/2) + RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][1]) - RoomMap.sizeOfFragment : (RoomMap.mapHeight/2) - RoomMap.sizeOfFragment*listOfFragments[i][1];
+			var posX = listOfFragments[i][0] < 1 ? Math.ceil((RoomMap.mapWidth/2)) - RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][0]) : Math.ceil((RoomMap.mapWidth/2)) + RoomMap.sizeOfFragment*listOfFragments[i][0] - RoomMap.sizeOfFragment;
+			var posY = listOfFragments[i][1] < 1 ? Math.ceil((RoomMap.mapHeight/2)) + RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][1]) - RoomMap.sizeOfFragment : Math.ceil((RoomMap.mapHeight/2)) - RoomMap.sizeOfFragment*listOfFragments[i][1];
 
 			//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
-			$(newFragment).css('left', posX + Math.round(Math.round(RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0] * -1) + 'px');
-			$(newFragment).css('top', posY + Math.round(Math.round(RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]) + 'px');
+			$(newFragment).css('left', posX + Math.round(RoomMap.position_X/RoomMap.scales[RoomMap.scale][0] * -1) + 'px');
+			$(newFragment).css('top', posY + Math.round(RoomMap.position_Y/RoomMap.scales[RoomMap.scale][0]) + 'px');
 			$(newFragment).addClass('FrMainMap');
 			
 			//Обработчик, плавное появление фрагмента после загрузки
@@ -196,8 +214,8 @@ var RoomMap = {
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
 			$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
-				$(fragment).css('top',parseInt($(this).css('top')) - (dY) + 'px');
-				$(fragment).css('left',parseInt($(this).css('left')) - (dX) + 'px');
+				$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
+				$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
 			});
 				
 			if(!RoomMap.timeoutLoader){
