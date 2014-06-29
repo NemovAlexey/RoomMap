@@ -1,3 +1,4 @@
 RoomMap.Langs = {
-	layers: 'Layers'
+	layers: 'Layers',
+	levels: 'Levels'
 }

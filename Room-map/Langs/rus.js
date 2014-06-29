@@ -1,3 +1,4 @@
 RoomMap.Langs = {
-	layers: '����'
+	layers: 'Слои',
+	levels: 'Уровни'
 }

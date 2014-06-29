@@ -291,8 +291,19 @@ var RoomMap = {
 		document.getElementsByTagName('head')[0].appendChild(newScript);
 	},
 	
+	//Загрузка кнопок/инструментов
 	LoadTools: function(){
 		//Кнопка "слои"
-		$('<div class="layers" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="tool_btn layers" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement);
+		//Кнопка "уровни"
+		$('<div class="tool_btn levels" title="' + RoomMap.Langs.levels + '"></div>').appendTo('#' + RoomMap.idElement);
+		
+		//Плавное изменение прозрачности при наведении
+		$('.tool_btn').hover(function(){
+			$(this).animate({opacity:'1'},200);
+		},
+		function(){
+			$(this).animate({opacity:'0.5'},200);
+		})
 	}
 }
