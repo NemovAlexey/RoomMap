@@ -42,7 +42,7 @@ var RoomMap = {
 				if(dY != Math.round(dY)){
 					RoomMap.position_Y = RoomMap.position_Y + (dY - Math.round(dY))*RoomMap.scales[RoomMap.scale][0];
 				}
-				RoomMap.updateUrl(RoomMap.position_X,RoomMap.position_Y);
+				RoomMap.updateUrl({x:RoomMap.position_X,y:RoomMap.position_Y});
 				
 				//Сдвигаем фрагменты карт
 				RoomMap.mapWidth = window.innerWidth;
@@ -72,6 +72,9 @@ var RoomMap = {
 		if(RoomMap.tools){
 			RoomMap.LoadTools();
 		}
+		
+		//Загружаем списки слоев и уровней
+		RoomMap.LoadLinks();
 
 		//Определяем список фрагментов
 		var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
@@ -79,8 +82,8 @@ var RoomMap = {
 		RoomMap.loadFragments(listOfFragments);
 
 		//Обработчик нажатия на карту левой кнопкой мыши
-		$('#' + RoomMap.idElement).mousedown(RoomMap.scrollMap);
-		$('#' + RoomMap.idElement).mouseup(RoomMap.scrollMapCancel);
+		$('#' + RoomMap.idElement).bind('mousedown touchstart',RoomMap.scrollMap);
+		$('#' + RoomMap.idElement).bind('mouseup touchend',RoomMap.scrollMapCancel);
 
 		//Отключаем скролл при отпускании кнопки мыши вне карты
 		$().mouseup(RoomMap.scrollMapCancel);
@@ -110,37 +113,47 @@ var RoomMap = {
 
 	//Загрузка фрагментов карты
 	loadFragments: function(listOfFragments){
-		for(var i = 0; i < listOfFragments.length; i++){
-			//Если фрагмент загружен, снова его грузить не надо
-			if($('#fr' + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
-			//Загружать фрагменты ограниченные размером карты
-			if(RoomMap.loadFragmentsForSize){
-				if(listOfFragments[i][0] > RoomMap.size[1] || listOfFragments[i][0] < -RoomMap.size[3] || listOfFragments[i][1] > RoomMap.size[0] || listOfFragments[i][1] < -RoomMap.size[2]) continue
-			}
 		
-			var newFragment = new Image();
-			newFragment.src = RoomMap.pathForFragments + '/' + RoomMap.scale + '/' + listOfFragments[i][0] + '&' + listOfFragments[i][1] + '.jpg';
-			$(newFragment).css({position: 'absolute', opacity: '0'});
-			$(newFragment).attr('id','fr' + listOfFragments[i][0] + listOfFragments[i][1]);
+		for(var i = 0; i < listOfFragments.length; i++){
+			//Список загружаемых частей (фрагменты и слои)
+			var covers = {fr:RoomMap.level,lr:RoomMap.layer};
+			for(var cover in covers){
+				//Для слоев. Если слой не выбран его не грузим
+				if(covers[cover] == 0) continue;
 			
-			//Позиция относительно центра координат
-			var posX = listOfFragments[i][0] < 1 ? Math.ceil((RoomMap.mapWidth/2)) - RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][0]) : Math.ceil((RoomMap.mapWidth/2)) + RoomMap.sizeOfFragment*listOfFragments[i][0] - RoomMap.sizeOfFragment;
-			var posY = listOfFragments[i][1] < 1 ? Math.ceil((RoomMap.mapHeight/2)) + RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][1]) - RoomMap.sizeOfFragment : Math.ceil((RoomMap.mapHeight/2)) - RoomMap.sizeOfFragment*listOfFragments[i][1];
+				//Если фрагмент загружен, снова его грузить не надо
+				if($('#' + cover + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
+				//Загружать фрагменты ограниченные размером карты
+				if(RoomMap.loadFragmentsForSize){
+					if(listOfFragments[i][0] > RoomMap.size[1] || listOfFragments[i][0] < -RoomMap.size[3] || listOfFragments[i][1] > RoomMap.size[0] || listOfFragments[i][1] < -RoomMap.size[2]) continue
+				}
+				
+				var newFragment = new Image();
+				var layerPath = cover == 'lr' ? 'layers/' + covers[cover] + '/' : '';				
+				newFragment.src = RoomMap.pathForFragments + '/' + RoomMap.scale + '/levels/' + RoomMap.level + '/' + layerPath + listOfFragments[i][0] + '&' + listOfFragments[i][1] + '.png';
+				$(newFragment).css({position: 'absolute', opacity: '0'});
+				$(newFragment).attr('id',cover + listOfFragments[i][0] + listOfFragments[i][1]);
+				
+				//Позиция относительно центра координат
+				var posX = listOfFragments[i][0] < 1 ? Math.ceil((RoomMap.mapWidth/2)) - RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][0]) : Math.ceil((RoomMap.mapWidth/2)) + RoomMap.sizeOfFragment*listOfFragments[i][0] - RoomMap.sizeOfFragment;
+				var posY = listOfFragments[i][1] < 1 ? Math.ceil((RoomMap.mapHeight/2)) + RoomMap.sizeOfFragment*Math.abs(listOfFragments[i][1]) - RoomMap.sizeOfFragment : Math.ceil((RoomMap.mapHeight/2)) - RoomMap.sizeOfFragment*listOfFragments[i][1];
 
-			//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
-			$(newFragment).css('left', posX + Math.round(RoomMap.position_X/RoomMap.scales[RoomMap.scale][0] * -1) + 'px');
-			$(newFragment).css('top', posY + Math.round(RoomMap.position_Y/RoomMap.scales[RoomMap.scale][0]) + 'px');
-			$(newFragment).addClass('FrMainMap');
+				//Вставляем элемент в блок + корректируем координаты (учитываем сдвиг)
+				$(newFragment).css('left', posX + Math.round(RoomMap.position_X/RoomMap.scales[RoomMap.scale][0] * -1) + 'px');
+				$(newFragment).css('top', posY + Math.round(RoomMap.position_Y/RoomMap.scales[RoomMap.scale][0]) + 'px');
+				$(newFragment).addClass(cover + 'MainMap');
+				
+				//Обработчик, плавное появление фрагмента после загрузки
+				$(newFragment).one('load',function(){
+					$(this).animate({opacity:'1'});
+				}).mousedown(function(event){
+					//Запрещаем перетаскивание фрагментов карты
+					event.preventDefault();
+				});
+				
+				$('#' + RoomMap.idElement).append(newFragment);
 			
-			//Обработчик, плавное появление фрагмента после загрузки
-			$(newFragment).one('load',function(){
-				$(this).animate({opacity:'1'});
-			}).mousedown(function(event){
-				//Запрещаем перетаскивание фрагментов карты
-				event.preventDefault();
-			});
-			
-			$('#' + RoomMap.idElement).append(newFragment);
+			}
 		}
 	},
 
@@ -158,15 +171,15 @@ var RoomMap = {
 	//Скроллинг карты
 	scrollMap: function(event){
 		//Координаты клика
-		var default_X = event.clientX;
-		var default_Y = event.clientY;
+		var default_X = event.clientX || event.originalEvent.touches[0].clientX;
+		var default_Y = event.clientY || event.originalEvent.touches[0].clientY;
 		
 		$(this).addClass('scrolledmap');
 
 		//Обработчик движения мыши
-		$().bind('mousemove',function(event){
-			var current_X = event.clientX;
-			var current_Y = event.clientY;
+		$().bind('mousemove touchmove',function(event){
+			var current_X = event.clientX || event.originalEvent.touches[0].clientX;
+			var current_Y = event.clientY || event.originalEvent.touches[0].clientY;
 			
 			var dY = default_Y - current_Y;
 			var dX = default_X - current_X;
@@ -227,40 +240,39 @@ var RoomMap = {
 				},300);
 			}
 			
-			default_X = event.clientX;
-			default_Y = event.clientY;
+			default_X = event.clientX || event.originalEvent.touches[0].clientX;
+			default_Y = event.clientY || event.originalEvent.touches[0].clientY;
 		});
 	},
 
 	//Заканчиваем скролл карты
 	scrollMapCancel: function(){
-		$().unbind('mousemove');
+		$().unbind('mousemove touchmove');
 		$('#' + RoomMap.idElement).removeClass('scrolledmap');
 		//Удаляем фрагменты карт
 		if(RoomMap.removeLostFragmens){
 			RoomMap.removeFragments();
 		}
-		RoomMap.updateUrl(RoomMap.position_X,RoomMap.position_Y);
+		RoomMap.updateUrl({x:RoomMap.position_X,y:RoomMap.position_Y});
 	},
 
-	//Обновление url при изменении позиционирования карты
-	updateUrl: function(x,y){
-		var params = new Array();
-		var newParams = new Array();
+	//Обновление URL при изменениях
+	updateUrl: function(objParams){
 		var l = location.search;
-
-		if(l){
-			params = l.substring(1).split('&');
-			$.each(params,function(index,value){/* alert(value); */
-				if(!value.match(/^x=[-0-9\.e]+$/,'') && !value.match(/^y=[-0-9\.e]+$/,'')){
-					newParams.push(value);
-				}
-			})
+		if(l == ''){
+			l = '?';
 		}
-
-		newParams.push('x=' + x);
-		newParams.push('y=' + y);
-		history.pushState(null,null,location.pathname + '?' + newParams.join('&'));
+		
+		for(var param in objParams){
+			var preg = new RegExp('[^a-z0-9]' + param + '=[^&]+');
+			if(preg.test(l)) {
+				var preg_replace = new RegExp('([?&]+)' + param + '=[^&]+','g');
+				l = l.replace(preg_replace,(objParams[param] != 0 ?  '$1' + param + '=' + objParams[param] : ''));
+			}else{
+				l += objParams[param] != 0 ? (l.length > 3 ? '&' : '') + param + '=' + objParams[param] : '';
+			}
+		}
+		history.pushState(null,null,location.pathname + l);
 	},
 
 	//Подключает файлы
@@ -282,7 +294,7 @@ var RoomMap = {
 		document.getElementsByTagName('head')[0].appendChild(newLink);		
 	},
 	
-	//Загрузка зависимых от загружаемых ранее файлов
+	//Подключение зависимых от подключенных ранее файлов
 	includeDependentFiles: function(){
 		var newScript = document.createElement('script');
 		newScript.type = 'text/javascript';
@@ -294,16 +306,96 @@ var RoomMap = {
 	//Загрузка кнопок/инструментов
 	LoadTools: function(){
 		//Кнопка "слои"
-		$('<div class="tool_btn layers" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement).click(function(){
+			RoomMap.ShowList('layers','layer',this);
+		});
 		//Кнопка "уровни"
-		$('<div class="tool_btn levels" title="' + RoomMap.Langs.levels + '"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo('#' + RoomMap.idElement).click(function(){
+			RoomMap.ShowList('levels','level',this);
+		});
 		
 		//Плавное изменение прозрачности при наведении
 		$('.tool_btn').hover(function(){
-			$(this).animate({opacity:'1'},200);
+			if(!$(this).hasClass('active'))
+				$(this).animate({opacity:'1'},200);
 		},
 		function(){
-			$(this).animate({opacity:'0.5'},200);
+			if(!$(this).hasClass('active'))
+				$(this).animate({opacity:'0.5'},200);
 		})
+	},
+	
+	//Загружает список доступных слоев, уровней
+	LoadLinks: function(){
+		$.ajax({
+			url: '/Room-map/Room-map-remote.php',
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				RoomMap.layers = data.layers;
+				RoomMap.levels = data.levels;
+			}
+		})
+	},
+	
+	//Показывет список во всплюывающем меню
+	ShowList: function(listName,itemType,button){
+		//Если повторно нажимаем на уже нажатую кнопку - скрываем список
+		if($(button).hasClass('active')){
+			$('#list').animate({bottom:'-120px'},200).queue(function(){$(this).remove();});
+			$(button).removeClass('active');
+			return;
+		}
+		
+		//Если какая-то кнопка была нажата до этого
+		$('.tool_btn.list').removeClass('active');
+		$(button).addClass('active');
+		$('.tool_btn.list').trigger('mouseout');
+		
+		//Заменяем элементы списка, если список уже открыт
+		if($('#' + RoomMap.idElement + " #list").length > 0){
+			$('#' + RoomMap.idElement + ' #list div.listItem').animate({opacity:0},100).queue(function(){
+				$('#' + RoomMap.idElement + ' #list div.listItem').remove();
+				$.each(RoomMap[listName],function(index,item){
+					$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({opacity:0,background:'url(/images/' + listName + '/' + item.code + '.png)'}).animate({opacity:1},200);
+				});
+			});
+		}else{
+			//Создаем блок, вставляем список и выводим его
+			$('<div id="list"></div>').appendTo('#' + RoomMap.idElement);
+			$.each(RoomMap[listName],function(index,item){
+				$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({background:'url(/images/' + listName + '/' + item.code + '.png)'});
+			});
+			$('#list').animate({bottom: '0px'},200);
+		}
+	},
+	
+	//Накладывает слой или меняет уровень при выборе из списка
+	selectItemList: function(item){
+		//Изменяем текущий URL
+		var param = {};
+		//При выборе уже активного слоя убираем его (из URL)
+		param[$(item).data('type')] = $(item).data('type') != 'level' && RoomMap[$(item).data('type')] == $(item).data('code') ? 0 : $(item).data('code');
+		RoomMap[$(item).data('type')] = param[$(item).data('type')];
+		RoomMap.updateUrl(param);
+		
+		//Загружаем слой или уровень
+		if($(item).data('type') == 'level'){
+			//Удаляем все фрагменты
+			$('#' + RoomMap.idElement).find('.frMainMap').remove();
+			//Проверить, есть ли выбранный слой на выбранном уровне (убрать или обновить) TODO
+			$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
+		}else if($(item).data('type') == 'layer'){
+			//Если выбран уже выбранный слой, то скрываем его
+			$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
+		}
+		
+		//Определяем список фрагментов
+		var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
+		//Загружаем фрагменты карт
+		RoomMap.loadFragments(listOfFragments);
+
+		//Скрываем блок-список повторным нажатием на кнопку
+		$('.tool_btn.list.active').trigger('click').removeClass('active').trigger('mouseout');
 	}
 }

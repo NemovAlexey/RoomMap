@@ -41,3 +41,8 @@ RoomMap.pathForFragments = '/maps';
 
 //Язык интерефейса
 RoomMap.lang = 'rus';
+
+//Значения по умолчанию
+RoomMap.scale = RoomMap.scale || 100;
+RoomMap.layer = RoomMap.layer || 0;
+RoomMap.level = RoomMap.level || 1;
