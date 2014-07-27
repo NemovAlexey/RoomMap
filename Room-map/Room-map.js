@@ -384,16 +384,19 @@ var RoomMap = {
 			//Удаляем все фрагменты
 			$('#' + RoomMap.idElement).find('.frMainMap').remove();
 			//Проверить, есть ли выбранный слой на выбранном уровне (убрать или обновить) TODO
-			$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
-		}else if($(item).data('type') == 'layer'){
-			//Если выбран уже выбранный слой, то скрываем его
-			$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
 		}
 		
-		//Определяем список фрагментов
-		var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
-		//Загружаем фрагменты карт
-		RoomMap.loadFragments(listOfFragments);
+		//Удаляем слой в любом случае
+		$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
+		
+		//После того, как все фрагменты слоя удалились загружаем новые (если нужно)
+		//Чтобы не сработала блокировка по существующим фрагментам
+		setTimeout(function(){
+			//Определяем список фрагментов
+			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
+			//Загружаем фрагменты карт
+			RoomMap.loadFragments(listOfFragments);
+		},250);
 
 		//Скрываем блок-список повторным нажатием на кнопку
 		$('.tool_btn.list.active').trigger('click').removeClass('active').trigger('mouseout');
