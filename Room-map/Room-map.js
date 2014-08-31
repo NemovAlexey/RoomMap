@@ -52,7 +52,7 @@ var RoomMap = {
 					height: RoomMap.mapHeight + 'px'
 				})
 				
-				$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
+				$('#' + RoomMap.idElement).find('img, svg').each(function(index,fragment){
 					$(fragment).css('top',parseInt($(this).css('top')) -  Math.ceil(dY) + 'px');
 					$(fragment).css('left',parseInt($(this).css('left')) - Math.ceil(dX) + 'px');
 				});
@@ -226,7 +226,7 @@ var RoomMap = {
 			RoomMap.position_X = RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0];
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
-			$('#' + RoomMap.idElement).find('img').each(function(index,fragment){
+			$('#' + RoomMap.idElement).find('img, svg').each(function(index,fragment){
 				$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
 				$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
 			});
@@ -330,12 +330,34 @@ var RoomMap = {
 		$.ajax({
 			url: '/Room-map/Room-map-remote.php',
 			type: 'get',
+			data: {
+				'data': 'getlists',
+ 				'min_x': RoomMap.position_X - (RoomMap.mapWidth * RoomMap.scales[RoomMap.scale][0] / 2),
+				'min_y': RoomMap.position_Y - (RoomMap.mapHeight * RoomMap.scales[RoomMap.scale][0] / 2),
+				'max_x': RoomMap.position_X + (RoomMap.mapWidth * RoomMap.scales[RoomMap.scale][0] / 2),
+				'max_y': RoomMap.position_Y + (RoomMap.mapHeight * RoomMap.scales[RoomMap.scale][0] / 2),
+				'level': RoomMap.level,
+				'layer': RoomMap.layer
+			},
 			dataType: 'json',
 			success: function(data){
 				RoomMap.layers = data.layers;
 				RoomMap.levels = data.levels;
+				RoomMap.svg = data.svg;
+				RoomMap.svgPositioner(RoomMap.svg);
 			}
 		})
+	},
+	
+	//Позиционирует SVG объекты на карте
+	svgPositioner: function(svgList){
+		$.each(svgList,function(index, data){
+			var height = parseInt((data.max_y - data.min_y) / RoomMap.scales[RoomMap.scale][0]);
+			var width = parseInt((data.max_x - data.min_x) / RoomMap.scales[RoomMap.scale][0]);
+			var left = parseInt((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
+			var top = parseInt((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
+			$('<svg height="' + height + '" width="' + width + '" style="left: ' + left + 'px; top: ' + top + 'px">' + data.content + '</svg>').appendTo('#' + RoomMap.idElement);
+		});
 	},
 	
 	//Показывет список во всплюывающем меню

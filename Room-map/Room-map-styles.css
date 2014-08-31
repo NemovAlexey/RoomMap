@@ -90,3 +90,13 @@
 	background: white;
 	padding: 5px;
 }
+
+svg {
+	position: absolute;
+	z-index: 3;
+}
+
+svg circle:hover {
+	fill: yellow;
+	cursor: pointer;
+}
