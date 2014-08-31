@@ -1,6 +1,6 @@
 //Размеры блока
-RoomMap.mapWidth = 801;
-RoomMap.mapHeight = 501;
+RoomMap.mapWidth = 901;
+RoomMap.mapHeight = 550;
 
 //На весь экран
 RoomMap.fullScreen = true;

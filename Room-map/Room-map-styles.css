@@ -91,12 +91,28 @@
 	padding: 5px;
 }
 
+.titlesvgblock {
+	display: none;
+	font: 11px Verdana;
+	border: 1px solid #c3c3c3;
+	background-color: white;
+	opacity: 0.8;
+	padding: 5px;
+	position: absolute;
+	z-index: 4;
+}
+
 svg {
 	position: absolute;
 	z-index: 3;
 }
 
-svg circle:hover {
-	fill: yellow;
+svg .svgobject {
 	cursor: pointer;
+}
+
+svg .svgobject:hover {
+	fill: yellow;
+	fill-opacity: 0.1;
+	stroke: blue;
 }

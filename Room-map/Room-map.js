@@ -1,3 +1,7 @@
+//TODO удаление SVG при выходе из зоны, при смене слоев и уровней
+
+
+
 var RoomMap = {
 	timeoutLoader: null,
 	//Матрица состояния загружаемых файлов
@@ -44,7 +48,7 @@ var RoomMap = {
 				}
 				RoomMap.updateUrl({x:RoomMap.position_X,y:RoomMap.position_Y});
 				
-				//Сдвигаем фрагменты карт
+				//Изменяем размер блока с картой
 				RoomMap.mapWidth = window.innerWidth;
 				RoomMap.mapHeight = window.innerHeight;
 				$('#' + RoomMap.idElement).css({
@@ -52,9 +56,18 @@ var RoomMap = {
 					height: RoomMap.mapHeight + 'px'
 				})
 				
-				$('#' + RoomMap.idElement).find('img, svg').each(function(index,fragment){
-					$(fragment).css('top',parseInt($(this).css('top')) -  Math.ceil(dY) + 'px');
-					$(fragment).css('left',parseInt($(this).css('left')) - Math.ceil(dX) + 'px');
+				//Изменяем размер SVG
+				$('#' + RoomMap.idElement).find('svg').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
+				
+				//Сдвигаем фрагменты карт
+				$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
+					if($(fragment).attr('class').baseVal == 'svgobject'){
+						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
+						fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+					}else{
+						$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
+						$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
+					}
 				});
 			})
 		}
@@ -72,6 +85,15 @@ var RoomMap = {
 		if(RoomMap.tools){
 			RoomMap.LoadTools();
 		}
+		
+		//Создаем SVG холст
+		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo('#' + RoomMap.idElement);
+		
+		//Блок для подсказок SVG
+		$('<div class="titlesvgblock"></div>').appendTo('#' + RoomMap.idElement);
+				
+		//Загружаем SVG объекты
+		RoomMap.loadSvg();
 		
 		//Загружаем списки слоев и уровней
 		RoomMap.LoadLinks();
@@ -226,9 +248,14 @@ var RoomMap = {
 			RoomMap.position_X = RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0];
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
-			$('#' + RoomMap.idElement).find('img, svg').each(function(index,fragment){
-				$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
-				$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
+			$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
+				if($(fragment).attr('class').baseVal == 'svgobject'){
+					fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
+					fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+				}else{
+					$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
+					$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
+				}
 			});
 				
 			if(!RoomMap.timeoutLoader){
@@ -236,6 +263,7 @@ var RoomMap = {
 					var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
 					//Загружаем фрагменты карт
 					RoomMap.loadFragments(listOfFragments);
+					RoomMap.loadSvg();
 					RoomMap.timeoutLoader = null;
 				},300);
 			}
@@ -331,7 +359,23 @@ var RoomMap = {
 			url: '/Room-map/Room-map-remote.php',
 			type: 'get',
 			data: {
-				'data': 'getlists',
+				'data': 'getlists'
+			},
+			dataType: 'json',
+			success: function(data){
+				RoomMap.layers = data.layers;
+				RoomMap.levels = data.levels;
+			}
+		})
+	},
+	
+	//Загружает SVG объекты
+	loadSvg: function(){
+		$.ajax({
+			url: '/Room-map/Room-map-remote.php',
+			type: 'get',
+			data: {
+				'data': 'getsvg',
  				'min_x': RoomMap.position_X - (RoomMap.mapWidth * RoomMap.scales[RoomMap.scale][0] / 2),
 				'min_y': RoomMap.position_Y - (RoomMap.mapHeight * RoomMap.scales[RoomMap.scale][0] / 2),
 				'max_x': RoomMap.position_X + (RoomMap.mapWidth * RoomMap.scales[RoomMap.scale][0] / 2),
@@ -341,8 +385,6 @@ var RoomMap = {
 			},
 			dataType: 'json',
 			success: function(data){
-				RoomMap.layers = data.layers;
-				RoomMap.levels = data.levels;
 				RoomMap.svg = data.svg;
 				RoomMap.svgPositioner(RoomMap.svg);
 			}
@@ -352,11 +394,33 @@ var RoomMap = {
 	//Позиционирует SVG объекты на карте
 	svgPositioner: function(svgList){
 		$.each(svgList,function(index, data){
-			var height = parseInt((data.max_y - data.min_y) / RoomMap.scales[RoomMap.scale][0]);
-			var width = parseInt((data.max_x - data.min_x) / RoomMap.scales[RoomMap.scale][0]);
-			var left = parseInt((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
-			var top = parseInt((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
-			$('<svg height="' + height + '" width="' + width + '" style="left: ' + left + 'px; top: ' + top + 'px">' + data.content + '</svg>').appendTo('#' + RoomMap.idElement);
+			var left = Math.round((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
+			var top = Math.round((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
+			data.content = JSON.parse(data.content);
+			
+			if($('#svg' + data.id).length > 0) return;
+			
+			//Для кругов
+			if(data.content.type == 'circle'){
+				var myCircle = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
+				myCircle.setAttributeNS(null,"class","svgobject");
+				myCircle.setAttributeNS(null,"id","svg" + data.id);
+				myCircle.setAttributeNS(null,"title",data.title);
+				myCircle.setAttributeNS(null,"iddescription",data.id_description);
+				myCircle.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				myCircle.setAttributeNS(null,"cy",top - parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				myCircle.setAttributeNS(null,"r",parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				myCircle.setAttributeNS(null,"fill","black");
+				myCircle.setAttributeNS(null,"fill-opacity","0.0");
+				$(myCircle).bind('mouseover mousemove',function(event){
+					$('.titlesvgblock').html(data.title).fadeIn(100);
+					$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+				});
+				$(myCircle).bind('mouseout',function(){
+					$('.titlesvgblock').fadeOut(100);
+				});
+				document.getElementsByTagName('svg')[0].appendChild(myCircle);
+			}
 		});
 	},
 	
