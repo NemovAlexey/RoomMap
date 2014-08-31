@@ -34,9 +34,9 @@ function getLevelsList(){
 function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 	if(!$layer) $layer = 'IS NULL';
 	else $layer = "= '".$layer."'";
-	$query = "SELECT * FROM objects o
+	$query = "SELECT o.id, o.min_x, o.min_y, o.max_x, o.max_y, t.title, o.id_description, o.content FROM objects o
 					LEFT JOIN layers l ON o.id_layer = l.id_layer
-					LEFT JOIN titles t ON t.id_title = t.id_title
+					LEFT JOIN titles t ON o.id_title = t.id_title
 						WHERE l.layer_code ".$layer."
 							AND o.id_levels = ".$level." 
 							AND ((o.min_x >= ".$xMin." AND o.min_x <= ".$xMax." AND o.min_y >= ".$yMin." AND o.min_y <= ".$yMax.") OR (o.max_x <= ".$xMax." AND o.max_x >= ".$xMin." AND o.max_y <= ".$yMax." AND o.max_y >= ".$yMin."))";

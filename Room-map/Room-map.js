@@ -1,4 +1,6 @@
 //TODO удаление SVG при выходе из зоны, при смене слоев и уровней
+//TODO вынести изменение координат в отдельную функцию
+//TODO решить проблему с напрыгиванием курсора на подсказку
 
 
 
@@ -61,9 +63,20 @@ var RoomMap = {
 				
 				//Сдвигаем фрагменты карт
 				$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
-					if($(fragment).attr('class').baseVal == 'svgobject'){
-						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
-						fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
+						if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
+							fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
+							fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+						}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
+							//Для полигонов перебираем все точки
+							var newPoints = [];
+							for(i = 0; i < $(fragment).attr('points').length; i++){
+								var x = $(fragment).attr('points')[i].x - dX;
+								var y = $(fragment).attr('points')[i].y - dY
+								newPoints.push([x + ',' + y]);
+							}
+							fragment.setAttributeNS(null,'points',newPoints.join(' '));
+						}
 					}else{
 						$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
 						$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
@@ -87,7 +100,9 @@ var RoomMap = {
 		}
 		
 		//Создаем SVG холст
-		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo('#' + RoomMap.idElement);
+		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').bind('mousemove',function(event){
+			$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+		}).appendTo('#' + RoomMap.idElement);
 		
 		//Блок для подсказок SVG
 		$('<div class="titlesvgblock"></div>').appendTo('#' + RoomMap.idElement);
@@ -249,9 +264,20 @@ var RoomMap = {
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
 			$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
-				if($(fragment).attr('class').baseVal == 'svgobject'){
-					fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
-					fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+				if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
+					if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
+						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
+						fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
+					}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
+						//Для полигонов перебираем все точки
+						var newPoints = [];
+						for(i = 0; i < $(fragment).attr('points').length; i++){
+							var x = $(fragment).attr('points')[i].x - dX;
+							var y = $(fragment).attr('points')[i].y - dY
+							newPoints.push([x + ',' + y]);
+						}
+						fragment.setAttributeNS(null,'points',newPoints.join(' '));
+					}
 				}else{
 					$(fragment).css('top',parseInt($(this).css('top')) - dY + 'px');
 					$(fragment).css('left',parseInt($(this).css('left')) - dX + 'px');
@@ -394,33 +420,56 @@ var RoomMap = {
 	//Позиционирует SVG объекты на карте
 	svgPositioner: function(svgList){
 		$.each(svgList,function(index, data){
-			var left = Math.round((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
-			var top = Math.round((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
+
 			data.content = JSON.parse(data.content);
-			
 			if($('#svg' + data.id).length > 0) return;
-			
+
 			//Для кругов
 			if(data.content.type == 'circle'){
-				var myCircle = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
-				myCircle.setAttributeNS(null,"class","svgobject");
-				myCircle.setAttributeNS(null,"id","svg" + data.id);
-				myCircle.setAttributeNS(null,"title",data.title);
-				myCircle.setAttributeNS(null,"iddescription",data.id_description);
-				myCircle.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				myCircle.setAttributeNS(null,"cy",top - parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				myCircle.setAttributeNS(null,"r",parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				myCircle.setAttributeNS(null,"fill","black");
-				myCircle.setAttributeNS(null,"fill-opacity","0.0");
-				$(myCircle).bind('mouseover mousemove',function(event){
-					$('.titlesvgblock').html(data.title).fadeIn(100);
-					$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+				var left = Math.round((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
+				var top = Math.round((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
+				
+				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
+				newObject.setAttributeNS(null,"class","svgobject svgcircle");
+				newObject.setAttributeNS(null,"id","svg" + data.id);
+				newObject.setAttributeNS(null,"title",data.title);
+				newObject.setAttributeNS(null,"iddescription",data.id_description);
+				newObject.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"cy",top - parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"r",parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"fill","black");
+				newObject.setAttributeNS(null,"fill-opacity","0.0");
+
+			}else if(data.content.type == 'polygon'){
+				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"polygon"); 
+				newObject.setAttributeNS(null,"class","svgobject svgpolygon");
+				newObject.setAttributeNS(null,"id","svg" + data.id);
+				newObject.setAttributeNS(null,"title",data.title);
+				newObject.setAttributeNS(null,"iddescription",data.id_description);
+				
+				//Пересчитываем координаты точек в соответствии с отступом
+				var points = [];
+				$.each(data.content.params.points,function(index,elements){
+					var x = Math.round((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(elements[0]))/RoomMap.scales[RoomMap.scale][0]);
+					var y = Math.round((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(elements[1]))/RoomMap.scales[RoomMap.scale][0]);
+					points.push(x + ',' + y);
 				});
-				$(myCircle).bind('mouseout',function(){
-					$('.titlesvgblock').fadeOut(100);
-				});
-				document.getElementsByTagName('svg')[0].appendChild(myCircle);
+				
+				newObject.setAttributeNS(null,"points",points.join(' '));
+				newObject.setAttributeNS(null,"fill","black");
+				newObject.setAttributeNS(null,"fill-opacity","0.0");
 			}
+			
+			
+			$(newObject).bind('mouseover',function(event){
+				$('.titlesvgblock').stop().html(data.title).css({'display':'block','opacity':0}).animate({'opacity':0.8},200);
+				$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+			});
+			$(newObject).bind('mouseout',function(){
+				$('.titlesvgblock').fadeOut(200);
+			});
+			document.getElementsByTagName('svg')[0].appendChild(newObject);
+			
 		});
 	},
 	
