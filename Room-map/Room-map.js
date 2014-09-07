@@ -1,6 +1,4 @@
-//TODO удаление SVG при выходе из зоны, при смене слоев и уровней
 //TODO вынести изменение координат в отдельную функцию
-//TODO решить проблему с напрыгиванием курсора на подсказку
 
 
 
@@ -100,12 +98,15 @@ var RoomMap = {
 		}
 		
 		//Создаем SVG холст
-		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').bind('mousemove',function(event){
-			$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
-		}).appendTo('#' + RoomMap.idElement);
-		
+		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo('#' + RoomMap.idElement);
+		$('#' + RoomMap.idElement).find('svg,.titlesvgblock').bind('mousemove',function(event){
+			$('#' + RoomMap.idElement).find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
+		});
+
 		//Блок для подсказок SVG
-		$('<div class="titlesvgblock"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="titlesvgblock"></div>').appendTo('#' + RoomMap.idElement).bind('mouseover mousemove',function(){
+			$(this).css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
+		});
 				
 		//Загружаем SVG объекты
 		RoomMap.loadSvg();
@@ -462,11 +463,11 @@ var RoomMap = {
 			
 			
 			$(newObject).bind('mouseover',function(event){
-				$('.titlesvgblock').stop().html(data.title).css({'display':'block','opacity':0}).animate({'opacity':0.8},200);
-				$('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+				$('#' + RoomMap.idElement).find('.titlesvgblock').stop().html(data.title).animate({'opacity':0.8},200);
+				$('#' + RoomMap.idElement).find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
 			});
 			$(newObject).bind('mouseout',function(){
-				$('.titlesvgblock').fadeOut(200);
+				$('#' + RoomMap.idElement).find('.titlesvgblock').animate({'opacity':0},200);
 			});
 			document.getElementsByTagName('svg')[0].appendChild(newObject);
 			
@@ -531,6 +532,8 @@ var RoomMap = {
 			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
 			//Загружаем фрагменты карт
 			RoomMap.loadFragments(listOfFragments);
+			//Удаляем SVG
+			$('#' + RoomMap.idElement).find('svg').children().remove();
 		},250);
 
 		//Скрываем блок-список повторным нажатием на кнопку
