@@ -1,5 +1,5 @@
 //TODO вынести изменение координат в отдельную функцию
-
+//TODO снова проблемы с ресайзом
 
 
 var RoomMap = {
@@ -21,6 +21,7 @@ var RoomMap = {
 				for(var i = 0; i < RoomMap.LoadMatrix.length; i++){
 					if(RoomMap.LoadMatrix[i] == 0) break;
 				}
+				RoomMap.$mapBlock = $('#' + idElement);
 				RoomMap.createMap();
 				clearInterval(RoomMap.timeoutLoader);
 				RoomMap.timeoutLoader = null;
@@ -51,16 +52,25 @@ var RoomMap = {
 				//Изменяем размер блока с картой
 				RoomMap.mapWidth = window.innerWidth;
 				RoomMap.mapHeight = window.innerHeight;
-				$('#' + RoomMap.idElement).css({
+				RoomMap.$mapBlock.css({
 					width: RoomMap.mapWidth + 'px',
 					height: RoomMap.mapHeight + 'px'
 				})
 				
+				//Изменяем размер затемненного фона и двигаем лоадер, если они есть
+				if(RoomMap.$mapBlock.find('.darkWall').length){
+					RoomMap.$mapBlock.find('.darkWall').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
+				}
+				if(RoomMap.$mapBlock.find('.loader').length){
+					RoomMap.$mapBlock.find('.loader').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px','margin-top': -10 + RoomMap.mapHeight/2 + 'px'});
+				}
+
+
 				//Изменяем размер SVG
-				$('#' + RoomMap.idElement).find('svg').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
+				RoomMap.$mapBlock.find('svg').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
 				
 				//Сдвигаем фрагменты карт
-				$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
+				RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
 					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
 						if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
 							fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
@@ -82,15 +92,18 @@ var RoomMap = {
 				});
 			})
 		}
+		else {
+			RoomMap.$mapBlock.css('border','1px solid whitesmoke');
+		}
 	
 		//Установка размеров карты
-		$('#' + RoomMap.idElement).css({
+		RoomMap.$mapBlock.css({
 			width: RoomMap.mapWidth + 'px',
 			height: RoomMap.mapHeight + 'px'
 		}).addClass('mapBlock');
 
 		//Установим лого
-		$('<div class="logo"></div>').appendTo('#' + RoomMap.idElement);
+		$('<div class="logo"></div>').appendTo(RoomMap.$mapBlock);
 
 		//Загружаем инструменты
 		if(RoomMap.tools){
@@ -98,13 +111,13 @@ var RoomMap = {
 		}
 		
 		//Создаем SVG холст
-		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo('#' + RoomMap.idElement);
-		$('#' + RoomMap.idElement).find('svg,.titlesvgblock').bind('mousemove',function(event){
-			$('#' + RoomMap.idElement).find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
+		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
+		RoomMap.$mapBlock.find('svg,.titlesvgblock').bind('mousemove',function(event){
+			RoomMap.$mapBlock.find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
 		});
 
 		//Блок для подсказок SVG
-		$('<div class="titlesvgblock"></div>').appendTo('#' + RoomMap.idElement).bind('mouseover mousemove',function(){
+		$('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(){
 			$(this).css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
 		});
 				
@@ -120,8 +133,8 @@ var RoomMap = {
 		RoomMap.loadFragments(listOfFragments);
 
 		//Обработчик нажатия на карту левой кнопкой мыши
-		$('#' + RoomMap.idElement).bind('mousedown touchstart',RoomMap.scrollMap);
-		$('#' + RoomMap.idElement).bind('mouseup touchend',RoomMap.scrollMapCancel);
+		RoomMap.$mapBlock.find('svg').bind('mousedown touchstart',RoomMap.scrollMap);
+		RoomMap.$mapBlock.find('svg').bind('mouseup touchend',RoomMap.scrollMapCancel);
 
 		//Отключаем скролл при отпускании кнопки мыши вне карты
 		$().mouseup(RoomMap.scrollMapCancel);
@@ -189,7 +202,7 @@ var RoomMap = {
 					event.preventDefault();
 				});
 				
-				$('#' + RoomMap.idElement).append(newFragment);
+				RoomMap.$mapBlock.append(newFragment);
 			
 			}
 		}
@@ -197,7 +210,7 @@ var RoomMap = {
 
 	//Удаляем фрагменты карт
 	removeFragments: function(){
-		$('#' + RoomMap.idElement).find('img').each(function(){
+		RoomMap.$mapBlock.find('img').each(function(){
 			var x = parseInt($(this).css('left'));
 			var y = parseInt($(this).css('top'));
 			if(x < 0 - RoomMap.distanceForLostFragments - RoomMap.sizeOfFragment || x > RoomMap.mapWidth + RoomMap.distanceForLostFragments || y < 0 - RoomMap.distanceForLostFragments - RoomMap.sizeOfFragment || y > RoomMap.mapHeight + RoomMap.distanceForLostFragments){
@@ -212,7 +225,8 @@ var RoomMap = {
 		var default_X = event.clientX || event.originalEvent.touches[0].clientX;
 		var default_Y = event.clientY || event.originalEvent.touches[0].clientY;
 		
-		$(this).addClass('scrolledmap');
+		event.preventDefault();
+		this.setAttributeNS(null,"class","svg scrolledmap");
 
 		//Обработчик движения мыши
 		$().bind('mousemove touchmove',function(event){
@@ -264,7 +278,7 @@ var RoomMap = {
 			RoomMap.position_X = RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0];
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
-			$('#' + RoomMap.idElement).find('img,.svgobject').each(function(index,fragment){
+			RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
 				if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
 					if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
 						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
@@ -303,7 +317,8 @@ var RoomMap = {
 	//Заканчиваем скролл карты
 	scrollMapCancel: function(){
 		$().unbind('mousemove touchmove');
-		$('#' + RoomMap.idElement).removeClass('scrolledmap');
+		var svgelement = RoomMap.$mapBlock.find('svg').get(0);
+		svgelement.setAttributeNS(null,'class','svg');
 		//Удаляем фрагменты карт
 		if(RoomMap.removeLostFragmens){
 			RoomMap.removeFragments();
@@ -361,11 +376,11 @@ var RoomMap = {
 	//Загрузка кнопок/инструментов
 	LoadTools: function(){
 		//Кнопка "слои"
-		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo('#' + RoomMap.idElement).click(function(){
+		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
 			RoomMap.ShowList('layers','layer',this);
 		});
 		//Кнопка "уровни"
-		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo('#' + RoomMap.idElement).click(function(){
+		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
 			RoomMap.ShowList('levels','level',this);
 		});
 		
@@ -425,29 +440,24 @@ var RoomMap = {
 			data.content = JSON.parse(data.content);
 			if($('#svg' + data.id).length > 0) return;
 
-			//Для кругов
+			//Создаем круг
 			if(data.content.type == 'circle'){
 				var left = Math.round((RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapWidth*RoomMap.scales[RoomMap.scale][0]/2 - RoomMap.position_X + parseFloat(data.min_x))/RoomMap.scales[RoomMap.scale][0]);
 				var top = Math.round((RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0] - RoomMap.mapHeight*RoomMap.scales[RoomMap.scale][0]/2 + RoomMap.position_Y - parseFloat(data.min_y))/RoomMap.scales[RoomMap.scale][0]);
 				
 				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
 				newObject.setAttributeNS(null,"class","svgobject svgcircle");
-				newObject.setAttributeNS(null,"id","svg" + data.id);
-				newObject.setAttributeNS(null,"title",data.title);
-				newObject.setAttributeNS(null,"iddescription",data.id_description);
+
 				newObject.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
 				newObject.setAttributeNS(null,"cy",top - parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
 				newObject.setAttributeNS(null,"r",parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				newObject.setAttributeNS(null,"fill","black");
-				newObject.setAttributeNS(null,"fill-opacity","0.0");
 
-			}else if(data.content.type == 'polygon'){
+			}
+			//Создаем полигон
+			else if(data.content.type == 'polygon'){
 				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"polygon"); 
 				newObject.setAttributeNS(null,"class","svgobject svgpolygon");
-				newObject.setAttributeNS(null,"id","svg" + data.id);
-				newObject.setAttributeNS(null,"title",data.title);
-				newObject.setAttributeNS(null,"iddescription",data.id_description);
-				
+			
 				//Пересчитываем координаты точек в соответствии с отступом
 				var points = [];
 				$.each(data.content.params.points,function(index,elements){
@@ -457,20 +467,56 @@ var RoomMap = {
 				});
 				
 				newObject.setAttributeNS(null,"points",points.join(' '));
-				newObject.setAttributeNS(null,"fill","black");
-				newObject.setAttributeNS(null,"fill-opacity","0.0");
 			}
 			
+			newObject.setAttributeNS(null,"id","svg" + data.id);
+			newObject.setAttributeNS(null,"title",data.title);
+			newObject.setAttributeNS(null,"iddescription", data.id_description);
+			newObject.setAttributeNS(null,"fill","black");
+			newObject.setAttributeNS(null,"fill-opacity","0.0");
 			
 			$(newObject).bind('mouseover',function(event){
-				$('#' + RoomMap.idElement).find('.titlesvgblock').stop().html(data.title).animate({'opacity':0.8},200);
-				$('#' + RoomMap.idElement).find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+				RoomMap.$mapBlock.find('.titlesvgblock').stop().html(data.title).animate({'opacity':0.8},200);
+				RoomMap.$mapBlock.find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
 			});
 			$(newObject).bind('mouseout',function(){
-				$('#' + RoomMap.idElement).find('.titlesvgblock').animate({'opacity':0},200);
+				RoomMap.$mapBlock.find('.titlesvgblock').animate({'opacity':0},200);
 			});
+
+			//Добавляем обработчик кликов и вставляем в документ
+			$(newObject).bind('click',RoomMap.ShowDetails);
 			document.getElementsByTagName('svg')[0].appendChild(newObject);
 			
+		});
+	},
+
+	//Загружает и выводит информацию о выделенном объекте
+	ShowDetails: function(){
+		//Получаем идентификатор объекта, делаем запрос к серверу и возвращаем документ
+		var id = $(this).attr('id').match(/svg([0-9]+)/)[1];
+
+		var ajax = $.ajax({
+			url: '/Room-map/Room-map-remote.php',
+			type: 'get',
+			dataType: 'json',
+			data: {
+				data: 'getdetails',
+				id: id
+			},
+			success: function(data){
+				if(data.details){
+					// TODO to finish
+				}
+			}
+		});
+
+		//Вставляем лоадер
+		$('<div class="loader"></div>').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px', 'margin-top': -10 + RoomMap.mapHeight/2 + 'px'}).appendTo(RoomMap.$mapBlock);
+		
+		//Создаем блок и выводим в него информацию
+		$('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100).bind('click',function(){
+			$(this).add('.loader',RoomMap.$mapBlock).animate({opacity: 0},100).queue(function(){$(this).remove()});
+			ajax.abort();
 		});
 	},
 	
@@ -489,16 +535,16 @@ var RoomMap = {
 		$('.tool_btn.list').trigger('mouseout');
 		
 		//Заменяем элементы списка, если список уже открыт
-		if($('#' + RoomMap.idElement + " #list").length > 0){
-			$('#' + RoomMap.idElement + ' #list div.listItem').animate({opacity:0},100).queue(function(){
-				$('#' + RoomMap.idElement + ' #list div.listItem').remove();
+		if(RoomMap.$mapBlock.find('#list').length > 0){
+			RoomMap.$mapBlock.find('#list div.listItem').animate({opacity:0},100).queue(function(){
+				RoomMap.$mapBlock.find('#list div.listItem').remove();
 				$.each(RoomMap[listName],function(index,item){
 					$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({opacity:0,background:'url(/images/' + listName + '/' + item.code + '.png)'}).animate({opacity:1},200);
 				});
 			});
 		}else{
 			//Создаем блок, вставляем список и выводим его
-			$('<div id="list"></div>').appendTo('#' + RoomMap.idElement);
+			$('<div id="list"></div>').appendTo(RoomMap.$mapBlock);
 			$.each(RoomMap[listName],function(index,item){
 				$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({background:'url(/images/' + listName + '/' + item.code + '.png)'});
 			});
@@ -518,12 +564,12 @@ var RoomMap = {
 		//Загружаем слой или уровень
 		if($(item).data('type') == 'level'){
 			//Удаляем все фрагменты
-			$('#' + RoomMap.idElement).find('.frMainMap').remove();
+			RoomMap.$mapBlock.find('.frMainMap').remove();
 			//Проверить, есть ли выбранный слой на выбранном уровне (убрать или обновить) TODO
 		}
 		
 		//Удаляем слой в любом случае
-		$('#' + RoomMap.idElement).find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
+		RoomMap.$mapBlock.find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
 		
 		//После того, как все фрагменты слоя удалились загружаем новые (если нужно)
 		//Чтобы не сработала блокировка по существующим фрагментам
@@ -533,7 +579,7 @@ var RoomMap = {
 			//Загружаем фрагменты карт
 			RoomMap.loadFragments(listOfFragments);
 			//Удаляем SVG
-			$('#' + RoomMap.idElement).find('svg').children().remove();
+			RoomMap.$mapBlock.find('svg').children().remove();
 		},250);
 
 		//Скрываем блок-список повторным нажатием на кнопку

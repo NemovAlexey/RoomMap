@@ -47,7 +47,6 @@
 }
 
 .scrolledmap {
-  cursor:hand;
   cursor:grab;
   cursor:-moz-grab;
   cursor:-webkit-grab;
@@ -115,4 +114,19 @@ svg .svgobject:hover {
 	fill: yellow;
 	fill-opacity: 0.1;
 	stroke: blue;
+}
+
+.darkWall {
+	z-index: 5;
+	position: absolute;
+	background-color: black;
+	opacity: 0;
+}
+
+.loader {
+	background: url(/images/loader.gif);
+	width: 220px;
+	height: 19px;
+	z-index: 6;
+	position: absolute;
 }

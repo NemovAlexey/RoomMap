@@ -4,7 +4,7 @@ $GLOBALS['database'] = new PDO('mysql:dbname=RoomMap;host=127.0.0.1','root','');
 $GLOBALS['database']->Exec("SET NAMES utf8");
 
 /*
-* @return array list of layers
+* @return array список слоев
 */
 function getLayersList(){
 	$layers = $GLOBALS['database']->Query("SELECT * FROM layers");
@@ -16,7 +16,7 @@ function getLayersList(){
 }
 
 /*
-* @return array list of levels
+* @return array список уровней
 */
 function getLevelsList(){
 	$levels = $GLOBALS['database']->Query("SELECT * FROM levels");
@@ -29,7 +29,7 @@ function getLevelsList(){
 
 
 /*
-* @return array list of SVG objects
+* @return array список SVG объектов
 */
 function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 	if(!$layer) $layer = 'IS NULL';
@@ -49,12 +49,23 @@ function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 	return $listOfSVG;
 }
 
+
+/*
+* @return string HTML код - описание объекта
+*/
+function  getSvgObjectDetails($svg_id){
+	return 'Hello world';
+}
+
 switch($_GET['data']){
 	case 'getlists': 
 		echo json_encode(array('layers' => getLayersList(), 'levels' => getLevelsList()));
 		break;
 	case 'getsvg':
 		echo json_encode(array('svg' => getListSVGObject($_GET['min_x'],$_GET['min_y'],$_GET['max_x'],$_GET['max_y'],$_GET['level'],$_GET['layer'])));
+		break;
+	case 'getdetails':
+		echo json_encode(array('details' => getSvgObjectDetails((int)$_GET['id'])));
 		break;
 }
 
