@@ -1,5 +1,7 @@
 //TODO вынести изменение координат в отдельную функцию
 //TODO снова проблемы с ресайзом
+//TODO сделать удаление svg при выходе из зоны
+//TODO сделать подсветку выбранного слоя/уровня и памятку в левом верхнем углу
 
 
 var RoomMap = {
@@ -57,14 +59,18 @@ var RoomMap = {
 					height: RoomMap.mapHeight + 'px'
 				})
 				
-				//Изменяем размер затемненного фона и двигаем лоадер, если они есть
+				//Изменяем размер затемненного фона, изменяем и двигаем инфоблок и двигаем лоадер, если они есть
 				if(RoomMap.$mapBlock.find('.darkWall').length){
 					RoomMap.$mapBlock.find('.darkWall').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
 				}
 				if(RoomMap.$mapBlock.find('.loader').length){
 					RoomMap.$mapBlock.find('.loader').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px','margin-top': -10 + RoomMap.mapHeight/2 + 'px'});
 				}
-
+				if(RoomMap.$mapBlock.find('.svgDetailsBlock').length){
+					var svgDetailsBlock = RoomMap.$mapBlock.find('.svgDetailsBlock');
+					svgDetailsBlock.css({'width': RoomMap.mapWidth*0.5 + 'px', 'height': RoomMap.mapHeight*0.8 + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
+					svgDetailsBlock.find('.content').css('height', svgDetailsBlock.height() - svgDetailsBlock.find('.header').outerHeight() + 'px');
+				}
 
 				//Изменяем размер SVG
 				RoomMap.$mapBlock.find('svg').css({width: RoomMap.mapWidth + 'px',height: RoomMap.mapHeight + 'px'});
@@ -120,7 +126,10 @@ var RoomMap = {
 		$('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(){
 			$(this).css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
 		});
-				
+			
+		//Блок для вывода информации об объекте
+		var svgDetailsBlock = $('<div class="svgDetailsBlock"><div class="header">' + RoomMap.Langs.svginfo + '</div><div class="content"></div></div>').appendTo(RoomMap.$mapBlock).css({width: 0.5 * RoomMap.mapWidth + 'px', height: 0.8 * RoomMap.mapHeight + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
+
 		//Загружаем SVG объекты
 		RoomMap.loadSvg();
 		
@@ -470,7 +479,6 @@ var RoomMap = {
 			}
 			
 			newObject.setAttributeNS(null,"id","svg" + data.id);
-			newObject.setAttributeNS(null,"title",data.title);
 			newObject.setAttributeNS(null,"iddescription", data.id_description);
 			newObject.setAttributeNS(null,"fill","black");
 			newObject.setAttributeNS(null,"fill-opacity","0.0");
@@ -504,17 +512,27 @@ var RoomMap = {
 				id: id
 			},
 			success: function(data){
-				if(data.details){
-					// TODO to finish
+				loader.remove();
+				if(data.details.length > 0){
+					// Показываем блок и выводим информацию
+					var $svgDetailsBlock = $('.svgDetailsBlock', RoomMap.$mapBlock);
+
+					$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
+					$svgDetailsBlock.fadeIn(100,function(){
+						$svgDetailsBlock.find('.content').animate({'height':  $svgDetailsBlock.height() - $svgDetailsBlock.find('.header').outerHeight() + 'px'},100);
+					});
+				}else{
+					darkWall.animate({opacity:0},100,function(){$(this).remove();});
 				}
 			}
 		});
 
 		//Вставляем лоадер
-		$('<div class="loader"></div>').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px', 'margin-top': -10 + RoomMap.mapHeight/2 + 'px'}).appendTo(RoomMap.$mapBlock);
+		var loader = $('<div class="loader"></div>').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px', 'margin-top': -10 + RoomMap.mapHeight/2 + 'px'}).appendTo(RoomMap.$mapBlock);
 		
-		//Создаем блок и выводим в него информацию
-		$('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100).bind('click',function(){
+		//Создаем блок-занавес и вешаем обработчик на клик
+		var darkWall = $('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100).bind('click',function(){
+			$(this).siblings('.svgDetailsBlock').fadeOut(100);
 			$(this).add('.loader',RoomMap.$mapBlock).animate({opacity: 0},100).queue(function(){$(this).remove()});
 			ajax.abort();
 		});

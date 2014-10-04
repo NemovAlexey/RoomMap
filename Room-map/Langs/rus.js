@@ -1,4 +1,5 @@
 RoomMap.Langs = {
 	layers: 'Слои',
-	levels: 'Уровни'
+	levels: 'Уровни',
+	svginfo: 'Информация об объекте'
 }
