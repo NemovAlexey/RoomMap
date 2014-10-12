@@ -81,6 +81,10 @@
 	color: black;
 }
 
+#list .listItem.selected {
+	border: 2px dashed rgb(199, 48, 48);
+}
+
 #list .listItem .listItemName {
 	position: absolute;
 	bottom: 13px;
@@ -155,9 +159,22 @@ svg .svgobject:hover {
 }
 
 .svgDetailsBlock .content {
-	padding: 10px 5px 5px 5px;
+	padding: 10px;
 	font: 11px Verdana;
 	color: #4B4B4B;
 	overflow: auto;
 	box-sizing: border-box;
+}
+
+.location {
+	position: absolute;
+	z-index: 4;
+	background: rgb(250, 250, 250);
+	padding: 3px;
+	font: 11px Verdana;
+	opacity: 0.9;
+}
+
+.location .layer {
+	cursor: pointer;
 }

@@ -1,8 +1,6 @@
 //TODO вынести изменение координат в отдельную функцию
 //TODO снова проблемы с ресайзом
 //TODO сделать удаление svg при выходе из зоны
-//TODO сделать подсветку выбранного слоя/уровня и памятку в левом верхнем углу
-
 
 var RoomMap = {
 	timeoutLoader: null,
@@ -115,6 +113,12 @@ var RoomMap = {
 		if(RoomMap.tools){
 			RoomMap.LoadTools();
 		}
+
+		//Блок для отображения текущего расположения
+		$('<div class="location"><span class="level"></span><span class="separator"></span><span class="layer" title="' + RoomMap.Langs.hidelayer + '"></span></div>').appendTo(RoomMap.$mapBlock).find('.layer').click(function(){
+			//При клике на слой, скрывает его
+			RoomMap.selectItemList(['layer',RoomMap.layer]);
+		});
 		
 		//Создаем SVG холст
 		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
@@ -416,6 +420,9 @@ var RoomMap = {
 			success: function(data){
 				RoomMap.layers = data.layers;
 				RoomMap.levels = data.levels;
+
+				//Устанавливаем информацию о текущей локации
+				RoomMap.setInfoLocation();
 			}
 		})
 	},
@@ -519,7 +526,7 @@ var RoomMap = {
 
 					$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
 					$svgDetailsBlock.fadeIn(100,function(){
-						$svgDetailsBlock.find('.content').animate({'height':  $svgDetailsBlock.height() - $svgDetailsBlock.find('.header').outerHeight() + 'px'},100);
+						$svgDetailsBlock.find('.content').css({'height':  $svgDetailsBlock.height() - $svgDetailsBlock.find('.header').outerHeight() + 'px'});
 					});
 				}else{
 					darkWall.animate({opacity:0},100,function(){$(this).remove();});
@@ -557,30 +564,31 @@ var RoomMap = {
 			RoomMap.$mapBlock.find('#list div.listItem').animate({opacity:0},100).queue(function(){
 				RoomMap.$mapBlock.find('#list div.listItem').remove();
 				$.each(RoomMap[listName],function(index,item){
-					$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({opacity:0,background:'url(/images/' + listName + '/' + item.code + '.png)'}).animate({opacity:1},200);
+					$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({opacity:0,background:'url(/images/' + listName + '/' + item.code + '.png) no-repeat'}).animate({opacity:1},200);
 				});
 			});
 		}else{
 			//Создаем блок, вставляем список и выводим его
-			$('<div id="list"></div>').appendTo(RoomMap.$mapBlock);
+			var list = $('<div id="list"></div>').appendTo(RoomMap.$mapBlock);
 			$.each(RoomMap[listName],function(index,item){
-				$('<div class="listItem" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList(this);}).css({background:'url(/images/' + listName + '/' + item.code + '.png)'});
+				$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo(list).data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({background:'url(/images/' + listName + '/' + item.code + '.png) no-repeat'});
+				
 			});
-			$('#list').animate({bottom: '0px'},200);
+			list.animate({bottom: '0px'},200);
 		}
 	},
 	
 	//Накладывает слой или меняет уровень при выборе из списка
-	selectItemList: function(item){
+	selectItemList: function(obj){
 		//Изменяем текущий URL
 		var param = {};
 		//При выборе уже активного слоя убираем его (из URL)
-		param[$(item).data('type')] = $(item).data('type') != 'level' && RoomMap[$(item).data('type')] == $(item).data('code') ? 0 : $(item).data('code');
-		RoomMap[$(item).data('type')] = param[$(item).data('type')];
+		param[obj[0]] = obj[0] != 'level' && RoomMap[obj[0]] == obj[1] ? 0 : obj[1];
+		RoomMap[obj[0]] = param[obj[0]];
 		RoomMap.updateUrl(param);
 		
 		//Загружаем слой или уровень
-		if($(item).data('type') == 'level'){
+		if(obj[0] == 'level'){
 			//Удаляем все фрагменты
 			RoomMap.$mapBlock.find('.frMainMap').remove();
 			//Проверить, есть ли выбранный слой на выбранном уровне (убрать или обновить) TODO
@@ -590,7 +598,7 @@ var RoomMap = {
 		RoomMap.$mapBlock.find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
 		
 		//После того, как все фрагменты слоя удалились загружаем новые (если нужно)
-		//Чтобы не сработала блокировка по существующим фрагментам
+		//Таймаут чтобы не сработала блокировка загрузки (существующих фрагментов карт), т.к. они плавно исчезают
 		setTimeout(function(){
 			//Определяем список фрагментов
 			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
@@ -598,9 +606,41 @@ var RoomMap = {
 			RoomMap.loadFragments(listOfFragments);
 			//Удаляем SVG
 			RoomMap.$mapBlock.find('svg').children().remove();
+			//Загружаем SVG объекты
+			RoomMap.loadSvg();
 		},250);
 
 		//Скрываем блок-список повторным нажатием на кнопку
 		$('.tool_btn.list.active').trigger('click').removeClass('active').trigger('mouseout');
+
+		//Устанавливаем информацию о текущей локации
+		RoomMap.setInfoLocation();
+	},
+
+	//Устанавливает информацию о текущей локации
+	setInfoLocation: function(){
+		var curLevel, curLayer;
+
+		$.each(RoomMap.levels,function(index,data){
+			if(data.id == RoomMap.level){
+				curLevel = data;
+			}
+		});
+
+		$.each(RoomMap.layers,function(index,data){
+			if(data.code == RoomMap.layer){
+				curLayer = data;
+			}
+		});
+
+		//Уровень
+		RoomMap.$mapBlock.find('.location .level').text(curLevel.name[RoomMap.lang]);
+		//Слой
+		if(curLayer){
+			RoomMap.$mapBlock.find('.location .layer').text(curLayer.name[RoomMap.lang].toLowerCase()).siblings('.separator').text(', ');
+		}
+		else {
+			RoomMap.$mapBlock.find('.location .layer').text('').siblings('.separator').text('');
+		}
 	}
 }
