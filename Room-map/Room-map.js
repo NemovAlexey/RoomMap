@@ -189,7 +189,7 @@ var RoomMap = {
 				if($('#' + cover + listOfFragments[i][0] + listOfFragments[i][1]).length > 0) continue;
 				//Загружать фрагменты ограниченные размером карты
 				if(RoomMap.loadFragmentsForSize){
-					if(listOfFragments[i][0] > RoomMap.size[1] || listOfFragments[i][0] < -RoomMap.size[3] || listOfFragments[i][1] > RoomMap.size[0] || listOfFragments[i][1] < -RoomMap.size[2]) continue
+					if(listOfFragments[i][0] > RoomMap.scales[RoomMap.scale][2][1] || listOfFragments[i][0] < -RoomMap.scales[RoomMap.scale][2][3] || listOfFragments[i][1] > RoomMap.scales[RoomMap.scale][2][0] || listOfFragments[i][1] < -RoomMap.scales[RoomMap.scale][2][2]) continue
 				}
 				
 				var newFragment = new Image();
@@ -252,37 +252,37 @@ var RoomMap = {
 			//Предотвращение побега
 			if(RoomMap.preventEscape){
 				//По горизонтали
-				if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
+				if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.scales[RoomMap.scale][2][3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
 					//Из-за погрешности вычислений используем диапазон
-					if(RoomMap.position_X > (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+					if(RoomMap.position_X > (-RoomMap.scales[RoomMap.scale][2][3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (-RoomMap.scales[RoomMap.scale][2][3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
 						dX = 0;
 					}else{
-						dX = Math.ceil(((-RoomMap.size[3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
+						dX = Math.ceil(((-RoomMap.scales[RoomMap.scale][2][3] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
 					}
 				}
-				else if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
+				else if((RoomMap.position_X + dX * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.scales[RoomMap.scale][2][1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])) {
 					//Из-за погрешности вычислений используем диапазон
-					if(RoomMap.position_X > (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+					if(RoomMap.position_X > (RoomMap.scales[RoomMap.scale][2][1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_X < (RoomMap.scales[RoomMap.scale][2][1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
 						dX = 0;
 					}else{
-						dX = Math.floor(((RoomMap.size[1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
+						dX = Math.floor(((RoomMap.scales[RoomMap.scale][2][1] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapWidth/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_X)/RoomMap.scales[RoomMap.scale][0]);
 					}
 				}
 				//По вертикали
-				if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
+				if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) > (RoomMap.scales[RoomMap.scale][2][0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
 					//Из-за погрешности вычислений используем диапазон
-					if(RoomMap.position_Y > (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+					if(RoomMap.position_Y > (RoomMap.scales[RoomMap.scale][2][0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.scales[RoomMap.scale][2][0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
 						dY = 0;
 					}else{
-						dY = -Math.floor(((RoomMap.size[0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
+						dY = -Math.floor(((RoomMap.scales[RoomMap.scale][2][0] * RoomMap.scales[RoomMap.scale][1] - RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
 					}
 				}
-				else if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
+				else if((RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0]) < (-RoomMap.scales[RoomMap.scale][2][2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])) {
 					//Из-за погрешности вычислений используем диапазон
-					if(RoomMap.position_Y > (RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
+					if(RoomMap.position_Y > (RoomMap.scales[RoomMap.scale][2][2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])-0.00001 && RoomMap.position_Y < (RoomMap.scales[RoomMap.scale][2][2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0])+0.00001){
 						dY = 0;
 					}else{
-						dY = -Math.ceil(((-RoomMap.size[2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
+						dY = -Math.ceil(((-RoomMap.scales[RoomMap.scale][2][2] * RoomMap.scales[RoomMap.scale][1] + RoomMap.mapHeight/2 * RoomMap.scales[RoomMap.scale][0]) - RoomMap.position_Y)/RoomMap.scales[RoomMap.scale][0]);
 					}
 				}
 
@@ -464,9 +464,9 @@ var RoomMap = {
 				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
 				newObject.setAttributeNS(null,"class","svgobject svgcircle");
 
-				newObject.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				newObject.setAttributeNS(null,"cy",top - parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
-				newObject.setAttributeNS(null,"r",parseInt(data.content.params.r*RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"cy",top - parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"r",parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
 
 			}
 			//Создаем полигон
