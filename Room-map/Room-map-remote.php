@@ -37,7 +37,7 @@ function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 					LEFT JOIN layers l ON o.id_layer = l.id_layer
 					LEFT JOIN titles t ON o.id_title = t.id_title
 						WHERE l.layer_code ".$layer."
-							AND o.id_levels = ".$level." 
+							AND FIND_IN_SET(".$level.",o.id_levels)
 							AND ((o.min_x >= ".$xMin." AND o.min_x <= ".$xMax." AND o.min_y >= ".$yMin." AND o.min_y <= ".$yMax.") OR (o.max_x <= ".$xMax." AND o.max_x >= ".$xMin." AND o.max_y <= ".$yMax." AND o.max_y >= ".$yMin."))";
 	
 	$objects = $GLOBALS['database']->Query($query);
@@ -51,19 +51,16 @@ function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 /*
 * @return string HTML код - описание объекта
 */
-function  getSvgObjectDetails($svg_id){
-	switch($svg_id){
-		case 2:
-			return '<p style="text-align: justify;"><img alt="" src="http://primamedia.ru/f/big/254/253346.jpg" style="width: 200px; height: 133px; float: left; margin-right: 10px; margin-bottom: 10px;" />Корпус №20 Дальневосточного федерального университета (ДВФУ) на острове Русском в период с 6 по 9 сентября станет самым охраняемым местом на территории кампуса. Именно здесь пройдет встреча лидеров экономик АТЭС &ndash; участниц форума АТЭС. Корр. РИА PrimaMedia прошли дорогой, по которой пойдут президенты.</p>
-					<p style="text-align: justify;">Кортежи будут подъезжать прямо к главному входу в корпус. Первым сюда войдет президент Российской Федерации Владимир Путин. Он пройдет к центру холла, где и будет встречать и приветствовать прибывающих лидеров экономик АТЭС. Как пояснили организаторы мероприятия, стать свидетелем этого исторического момента смогут не более трех журналистов от страны. Но в пресс-центр будет поступать видеоизображение встречи.</p>
-					<p style="text-align: justify;">Кортежи будут подъезжать прямо к главному входу в корпус. Первым сюда войдет президент Российской Федерации Владимир Путин. Он пройдет к центру холла, где и будет встречать и приветствовать прибывающих лидеров экономик АТЭС. Как пояснили организаторы мероприятия, стать свидетелем этого исторического момента смогут не более трех журналистов от страны. Но в пресс-центр будет поступать видеоизображение встречи.</p>
-					<p style="text-align: justify;"Кортежи будут подъезжать прямо к главному входу в корпус. Первым сюда войдет президент Российской Федерации Владимир Путин. Он пройдет к центру холла, где и будет встречать и приветствовать прибывающих лидеров экономик АТЭС. Как пояснили организаторы мероприятия, стать свидетелем этого исторического момента смогут не более трех журналистов от страны. Но в пресс-центр будет поступать видеоизображение встречи.</p>
-					<p style="text-align: justify;">Кортежи будут подъезжать прямо к главному входу в корпус. Первым сюда войдет президент Российской Федерации Владимир Путин. Он пройдет к центру холла, где и будет встречать и приветствовать прибывающих лидеров экономик АТЭС. Как пояснили организаторы мероприятия, стать свидетелем этого исторического момента смогут не более трех журналистов от страны. Но в пресс-центр будет поступать видеоизображение встречи.</p>
-					<p style="text-align: justify;">Кортежи будут подъезжать прямо к главному входу в корпус. Первым сюда войдет президент Российской Федерации Владимир Путин. Он пройдет к центру холла, где и будет встречать и приветствовать прибывающих лидеров экономик АТЭС. Как пояснили организаторы мероприятия, стать свидетелем этого исторического момента смогут не более трех журналистов от страны. Но в пресс-центр будет поступать видеоизображение встречи.</p>';
-			break;
-		default:
-			return '';
-	}
+function  getSvgObjectDetails($svg_id, $level){
+	$query = "SELECT d.content FROM objects o
+				LEFT JOIN descriptions d ON o.id_description = d.id_description
+					WHERE o.id = ".$svg_id."
+						AND FIND_IN_SET(".$level.",d.id_level)";
+
+	$objects = $GLOBALS['database']->Query($query);
+	$object = $objects->Fetch(PDO::FETCH_ASSOC);
+
+	return $object['content'];
 }
 
 
@@ -75,7 +72,7 @@ switch($_GET['data']){
 		echo json_encode(array('svg' => getListSVGObject($_GET['min_x'],$_GET['min_y'],$_GET['max_x'],$_GET['max_y'],$_GET['level'],$_GET['layer'])));
 		break;
 	case 'getdetails':
-		echo json_encode(array('details' => getSvgObjectDetails((int)$_GET['id'])));
+		echo json_encode(array('details' => getSvgObjectDetails((int)$_GET['object_id'], (int)$_GET['level'])));
 		break;
 }
 

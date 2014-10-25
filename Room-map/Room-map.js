@@ -516,11 +516,12 @@ var RoomMap = {
 			dataType: 'json',
 			data: {
 				data: 'getdetails',
-				id: id
+				object_id: id,
+				level: RoomMap.level
 			},
 			success: function(data){
 				loader.remove();
-				if(data.details.length > 0){
+				if(data.details != null && data.details.length > 0){
 					// Показываем блок и выводим информацию
 					var $svgDetailsBlock = $('.svgDetailsBlock', RoomMap.$mapBlock);
 
