@@ -95,7 +95,7 @@
 }
 
 .titlesvgblock {
-	display: block;
+	display: inline-table;
 	font: 11px Verdana;
 	border: 1px solid #c3c3c3;
 	background-color: white;
@@ -177,4 +177,15 @@ svg .svgobject:hover {
 
 .location .layer {
 	cursor: pointer;
+}
+
+.target {
+	width: 5px;
+	height: 5px;
+	background: url(/images/target.png);
+	z-index: 4;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -1px 0px 0px -2px;
 }

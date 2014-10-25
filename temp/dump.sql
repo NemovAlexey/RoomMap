@@ -123,7 +123,7 @@ CREATE TABLE `objects` (
 
 LOCK TABLES `objects` WRITE;
 /*!40000 ALTER TABLE `objects` DISABLE KEYS */;
-INSERT INTO `objects` VALUES (1,'1,2',0,300,4628.57,700,5028.57,1,1,'{\"type\":\"circle\",\"params\": {\"r\":200}}'),(2,'1',0,375,-65,1150,350,2,2,'{\"type\":\"polygon\",\"params\":{\"points\":[[3842.85,1185.71],[1542.85,1185.71],[1542.85,957.14],[1257.14,957.14],[1257.14,28.57],[1542.85,28.57],[1542.85,-199.99],[3842.85,-199.99]]}}');
+INSERT INTO `objects` VALUES (1,'1',0,300,4628.57,700,5028.57,1,1,'{\"type\":\"circle\",\"params\": {\"r\":200}}'),(2,'1',0,1257.14,-199.99,3842.85,1185.71,2,2,'{\"type\":\"polygon\",\"params\":{\"points\":[[3842.85,1185.71],[1542.85,1185.71],[1542.85,957.14],[1257.14,957.14],[1257.14,28.57],[1542.85,28.57],[1542.85,-199.99],[3842.85,-199.99]]}}');
 /*!40000 ALTER TABLE `objects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -163,4 +163,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-10-25 20:57:17
+-- Dump completed on 2014-10-26  1:58:43

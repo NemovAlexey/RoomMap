@@ -64,10 +64,9 @@ var RoomMap = {
 				if(RoomMap.$mapBlock.find('.loader').length){
 					RoomMap.$mapBlock.find('.loader').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px','margin-top': -10 + RoomMap.mapHeight/2 + 'px'});
 				}
-				if(RoomMap.$mapBlock.find('.svgDetailsBlock').length){
-					var svgDetailsBlock = RoomMap.$mapBlock.find('.svgDetailsBlock');
-					svgDetailsBlock.css({'width': RoomMap.mapWidth*0.5 + 'px', 'height': RoomMap.mapHeight*0.8 + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
-					svgDetailsBlock.find('.content').css('height', svgDetailsBlock.height() - svgDetailsBlock.find('.header').outerHeight() + 'px');
+				if(RoomMap.$svgDetailsBlock.length){
+					RoomMap.$svgDetailsBlock.css({'width': RoomMap.mapWidth*0.5 + 'px', 'height': RoomMap.mapHeight*0.8 + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
+					RoomMap.$svgDetailsBlock.find('.content').css('height', RoomMap.$svgDetailsBlock.height() - RoomMap.$svgDetailsBlock.find('.header').outerHeight() + 'px');
 				}
 
 				//Изменяем размер SVG
@@ -119,20 +118,30 @@ var RoomMap = {
 			//При клике на слой, скрывает его
 			RoomMap.selectItemList(['layer',RoomMap.layer]);
 		});
+
+		//Прицел на центр карты
+		if(RoomMap.showTarget){
+			var target = $('<div class="target"></div>').appendTo(RoomMap.$mapBlock);
+			(function pulsar(){
+				target.fadeOut(500,function(){
+					target.fadeIn(500,pulsar);
+				})
+			})();
+		}
 		
 		//Создаем SVG холст
-		$('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
-		RoomMap.$mapBlock.find('svg,.titlesvgblock').bind('mousemove',function(event){
-			RoomMap.$mapBlock.find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
+		RoomMap.$svg = $('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
+		//Создаем блок для подсказок SVG и вешаем событие на него, чтобы отскакивал
+		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(){
+			RoomMap.moveTitleSvgBlock();
 		});
-
-		//Блок для подсказок SVG
-		$('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(){
-			$(this).css({'top':event.pageY - 30 + 'px','left':event.pageX + 10 + 'px'});
+		//Движение подсказки при 'ходьбе' по SVG объекту
+		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
+			RoomMap.moveTitleSvgBlock();
 		});
 			
 		//Блок для вывода информации об объекте
-		var svgDetailsBlock = $('<div class="svgDetailsBlock"><div class="header">' + RoomMap.Langs.svginfo + '</div><div class="content"></div></div>').appendTo(RoomMap.$mapBlock).css({width: 0.5 * RoomMap.mapWidth + 'px', height: 0.8 * RoomMap.mapHeight + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
+		RoomMap.$svgDetailsBlock = $('<div class="svgDetailsBlock"><div class="header">' + RoomMap.Langs.svginfo + '</div><div class="content"></div></div>').appendTo(RoomMap.$mapBlock).css({width: 0.5 * RoomMap.mapWidth + 'px', height: 0.8 * RoomMap.mapHeight + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
 
 		//Загружаем SVG объекты
 		RoomMap.loadSvg();
@@ -146,8 +155,11 @@ var RoomMap = {
 		RoomMap.loadFragments(listOfFragments);
 
 		//Обработчик нажатия на карту левой кнопкой мыши
-		RoomMap.$mapBlock.find('svg').bind('mousedown touchstart',RoomMap.scrollMap);
-		RoomMap.$mapBlock.find('svg').bind('mouseup touchend',RoomMap.scrollMapCancel);
+		RoomMap.$svg.bind('mousedown touchstart',RoomMap.scrollMap);
+		RoomMap.$svg.bind('mouseup touchend',RoomMap.scrollMapCancel);
+
+		//Обработчик прокрутки колесика
+		RoomMap.$svg.bind('wheel',RoomMap.selectScale);
 
 		//Отключаем скролл при отпускании кнопки мыши вне карты
 		$().mouseup(RoomMap.scrollMapCancel);
@@ -491,11 +503,10 @@ var RoomMap = {
 			newObject.setAttributeNS(null,"fill-opacity","0.0");
 			
 			$(newObject).bind('mouseover',function(event){
-				RoomMap.$mapBlock.find('.titlesvgblock').stop().html(data.title).animate({'opacity':0.8},200);
-				RoomMap.$mapBlock.find('.titlesvgblock').css({'top':event.pageY - 30 + 'px','left':event.pageX + 'px'});
+				RoomMap.$titlesvgblock.stop().html(data.title).animate({'opacity':0.8},200);
 			});
 			$(newObject).bind('mouseout',function(){
-				RoomMap.$mapBlock.find('.titlesvgblock').animate({'opacity':0},200);
+				RoomMap.$titlesvgblock.animate({'opacity':0},200);
 			});
 
 			//Добавляем обработчик кликов и вставляем в документ
@@ -523,11 +534,9 @@ var RoomMap = {
 				loader.remove();
 				if(data.details != null && data.details.length > 0){
 					// Показываем блок и выводим информацию
-					var $svgDetailsBlock = $('.svgDetailsBlock', RoomMap.$mapBlock);
-
-					$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
-					$svgDetailsBlock.fadeIn(100,function(){
-						$svgDetailsBlock.find('.content').css({'height':  $svgDetailsBlock.height() - $svgDetailsBlock.find('.header').outerHeight() + 'px'});
+					RoomMap.$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
+					RoomMap.$svgDetailsBlock.fadeIn(100,function(){
+						RoomMap.$svgDetailsBlock.find('.content').css({'height':  RoomMap.$svgDetailsBlock.height() - RoomMap.$svgDetailsBlock.find('.header').outerHeight() + 'px'});
 					});
 				}else{
 					darkWall.animate({opacity:0},100,function(){$(this).remove();});
@@ -540,7 +549,7 @@ var RoomMap = {
 		
 		//Создаем блок-занавес и вешаем обработчик на клик
 		var darkWall = $('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100).bind('click',function(){
-			$(this).siblings('.svgDetailsBlock').fadeOut(100);
+			RoomMap.$svgDetailsBlock.fadeOut(100);
 			$(this).add('.loader',RoomMap.$mapBlock).animate({opacity: 0},100).queue(function(){$(this).remove()});
 			ajax.abort();
 		});
@@ -585,7 +594,16 @@ var RoomMap = {
 		var param = {};
 		//При выборе уже активного слоя убираем его (из URL)
 		param[obj[0]] = obj[0] != 'level' && RoomMap[obj[0]] == obj[1] ? 0 : obj[1];
+		//Если масштаб не дефолтный - обновляем и его 
+		if(RoomMap.scale != RoomMap.scaleDefault){
+			param['scale'] = RoomMap.scale;
+		}else{
+			param['scale'] = 0;
+		}
+
+		//Изменяем текущий выбранный уровень/слой
 		RoomMap[obj[0]] = param[obj[0]];
+		//Обновляем url
 		RoomMap.updateUrl(param);
 		
 		//Загружаем слой или уровень
@@ -596,7 +614,9 @@ var RoomMap = {
 		}
 		
 		//Удаляем слой в любом случае
-		RoomMap.$mapBlock.find('.lrMainMap').animate({opacity:0},200).queue(function(){$(this).remove()});
+		RoomMap.$mapBlock.find('.lrMainMap').animate({opacity:0},200,function(){$(this).remove()});
+		//Удаляем SVG
+		RoomMap.$mapBlock.find('svg').children().remove();
 		
 		//После того, как все фрагменты слоя удалились загружаем новые (если нужно)
 		//Таймаут чтобы не сработала блокировка загрузки (существующих фрагментов карт), т.к. они плавно исчезают
@@ -605,14 +625,14 @@ var RoomMap = {
 			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
 			//Загружаем фрагменты карт
 			RoomMap.loadFragments(listOfFragments);
-			//Удаляем SVG
-			RoomMap.$mapBlock.find('svg').children().remove();
 			//Загружаем SVG объекты
 			RoomMap.loadSvg();
 		},250);
 
 		//Скрываем блок-список повторным нажатием на кнопку
 		$('.tool_btn.list.active').trigger('click').removeClass('active').trigger('mouseout');
+		//Скрываем подсказку, иначе может остаться висеть постоянно
+		RoomMap.$titlesvgblock.animate({'opacity':0},200);
 
 		//Устанавливаем информацию о текущей локации
 		RoomMap.setInfoLocation();
@@ -643,5 +663,57 @@ var RoomMap = {
 		else {
 			RoomMap.$mapBlock.find('.location .layer').text('').siblings('.separator').text('');
 		}
+	},
+
+	//Выбор масштаба колесиком мыши
+	selectScale: function(){
+		//Уменьшаем масштаб 
+		if(event.deltaY > 0){
+			//Проверим, есть ли меньший масштаб
+			for(var i = 0; i < RoomMap.scalesList.length; i++){
+				if(RoomMap.scalesList[i] == RoomMap.scale){
+					//Если есть масштаб меньше, загружаем его
+					if(typeof RoomMap.scalesList[i+1] != 'undefined' && RoomMap.scalesList[i+1] > RoomMap.scale){
+						RoomMap.changeScale(RoomMap.scalesList[i+1]);
+					}
+					return;
+				}
+			}
+		}
+		//Увеличиваем масштаб
+		else {
+			//Проверим, есть ли больший масштаб
+			for(var i = RoomMap.scalesList.length - 1; i >= 0; i--){
+				if(RoomMap.scalesList[i] == RoomMap.scale){
+					//Если есть масштаб меньше, загружаем его
+					if(typeof RoomMap.scalesList[i-1] != 'undefined' && RoomMap.scalesList[i-1] < RoomMap.scale){
+						RoomMap.changeScale(RoomMap.scalesList[i-1]);
+					}
+					return;
+				}
+			}
+		}
+	},
+
+	//Изменение масштаба
+	changeScale: function(scale){
+		RoomMap.scale = scale;
+		RoomMap.selectItemList(['level',RoomMap.level]);
+	},
+
+	//Движение подсказки
+	moveTitleSvgBlock: function(){
+		if((event.pageX + RoomMap.$titlesvgblock.outerWidth() + 10) > RoomMap.mapWidth){
+			var x = event.pageX - 25 - RoomMap.$titlesvgblock.outerWidth();
+		}else{
+			var x = event.pageX + 10;
+		}
+
+		if((event.pageY - RoomMap.$titlesvgblock.outerHeight()) <= 0){
+			var y = event.pageY + 25 - RoomMap.$titlesvgblock.outerHeight();
+		}else{
+			var y = event.pageY - 30;
+		}
+		RoomMap.$titlesvgblock.css({'top': y + 'px','left': x + 'px'});
 	}
 }
