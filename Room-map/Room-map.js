@@ -133,7 +133,7 @@ var RoomMap = {
 		RoomMap.$svg = $('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
 		//Создаем блок для подсказок SVG и вешаем событие на него, чтобы отскакивал
 		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(event){
-			RoomMap.moveTitleSvgBlock(event);
+			//RoomMap.moveTitleSvgBlock(event);
 		});
 		//Движение подсказки при 'ходьбе' по SVG объекту
 		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
@@ -715,19 +715,42 @@ var RoomMap = {
 		RoomMap.selectItemList(['level',RoomMap.level]);
 	},
 
+
 	//Движение подсказки
 	moveTitleSvgBlock: function(event){
-		if((event.pageX + RoomMap.$titlesvgblock.outerWidth() + 10) > RoomMap.mapWidth){
-			var x = event.pageX - 25 - RoomMap.$titlesvgblock.outerWidth();
+		var offsetX = 15;
+		if((event.originalEvent.offsetX + RoomMap.$titlesvgblock.outerWidth() + offsetX) > RoomMap.mapWidth){
+			//Плавно перетаскиваем блок в другую сторону
+			if(RoomMap.$titlesvgblock.data('offsetX') == 'right'){
+				RoomMap.$titlesvgblock.animate({'margin-left': -(offsetX + RoomMap.$titlesvgblock.outerWidth()) + 'px'},100);
+			}
+
+			RoomMap.$titlesvgblock.data('offsetX','left');
 		}else{
-			var x = event.pageX + 10;
+			//Плавно перетаскиваем блок в другую сторону
+			if(RoomMap.$titlesvgblock.data('offsetX') == 'left'){
+				RoomMap.$titlesvgblock.animate({'margin-left': offsetX + 'px'},100);
+			}
+
+			RoomMap.$titlesvgblock.data('offsetX','right');
 		}
 
-		if((event.pageY - RoomMap.$titlesvgblock.outerHeight()) <= 0){
-			var y = event.pageY + 25 - RoomMap.$titlesvgblock.outerHeight();
+		var offsetY = 30;
+		if((event.originalEvent.offsetY - offsetY < 0)){
+			if(RoomMap.$titlesvgblock.data('offsetY') == 'top'){
+				RoomMap.$titlesvgblock.animate({'margin-top': offsetY + 'px'},100);
+			}
+
+			RoomMap.$titlesvgblock.data('offsetY','bottom');
 		}else{
-			var y = event.pageY - 30;
+			if(RoomMap.$titlesvgblock.data('offsetY') == 'bottom'){
+				RoomMap.$titlesvgblock.animate({'margin-top': -offsetY + 'px'},100);
+			}
+
+			RoomMap.$titlesvgblock.data('offsetY','top');
 		}
-		RoomMap.$titlesvgblock.css({'top': y + 'px','left': x + 'px'});
+
+
+		RoomMap.$titlesvgblock.css({'top': event.originalEvent.offsetY + 'px','left': event.originalEvent.offsetX + 'px'});
 	}
 }
