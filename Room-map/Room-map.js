@@ -21,7 +21,7 @@ var RoomMap = {
 				for(var i = 0; i < RoomMap.LoadMatrix.length; i++){
 					if(RoomMap.LoadMatrix[i] == 0) break;
 				}
-				RoomMap.$mapBlock = $('#' + idElement);
+				RoomMap.$mapBlock = $('#' + idElement).addClass('roomMapContentBlock');
 				RoomMap.createMap();
 				clearInterval(RoomMap.timeoutLoader);
 				RoomMap.timeoutLoader = null;
@@ -103,7 +103,7 @@ var RoomMap = {
 		RoomMap.$mapBlock.css({
 			width: RoomMap.mapWidth + 'px',
 			height: RoomMap.mapHeight + 'px'
-		}).addClass('mapBlock');
+		});
 
 		//Установим лого
 		$('<div class="logo"></div>').appendTo(RoomMap.$mapBlock);
@@ -132,12 +132,12 @@ var RoomMap = {
 		//Создаем SVG холст
 		RoomMap.$svg = $('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
 		//Создаем блок для подсказок SVG и вешаем событие на него, чтобы отскакивал
-		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(){
-			RoomMap.moveTitleSvgBlock();
+		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(event){
+			RoomMap.moveTitleSvgBlock(event);
 		});
 		//Движение подсказки при 'ходьбе' по SVG объекту
 		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
-			RoomMap.moveTitleSvgBlock();
+			RoomMap.moveTitleSvgBlock(event);
 		});
 			
 		//Блок для вывода информации об объекте
@@ -158,8 +158,13 @@ var RoomMap = {
 		RoomMap.$svg.bind('mousedown touchstart',RoomMap.scrollMap);
 		RoomMap.$svg.bind('mouseup touchend',RoomMap.scrollMapCancel);
 
-		//Обработчик прокрутки колесика
-		RoomMap.$svg.bind('wheel',RoomMap.selectScale);
+		//Обработчик прокрутки колесика (пока только для Chrome)
+		RoomMap.$svg.bind('wheel',function(){
+			if(typeof event != 'undefined'){
+				event.preventDefault();
+				RoomMap.selectScale(event);
+			}
+		});
 
 		//Отключаем скролл при отпускании кнопки мыши вне карты
 		$().mouseup(RoomMap.scrollMapCancel);
@@ -408,6 +413,15 @@ var RoomMap = {
 		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
 			RoomMap.ShowList('levels','level',this);
 		});
+
+		//Кнопка "плюс"
+		$('<div class="tool_btn plus" title="' + RoomMap.Langs.gocloser + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+			RoomMap.selectScale({},-1);
+		});
+		//Кнопка "минус"
+		$('<div class="tool_btn minus" title="' + RoomMap.Langs.goaway + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+			RoomMap.selectScale({},1);
+		});
 		
 		//Плавное изменение прозрачности при наведении
 		$('.tool_btn').hover(function(){
@@ -609,7 +623,7 @@ var RoomMap = {
 		//Загружаем слой или уровень
 		if(obj[0] == 'level'){
 			//Удаляем все фрагменты
-			RoomMap.$mapBlock.find('.frMainMap').remove();
+			RoomMap.$mapBlock.find('.frMainMap').animate({opacity:0},200,function(){$(this).remove()});;
 			//Проверить, есть ли выбранный слой на выбранном уровне (убрать или обновить) TODO
 		}
 		
@@ -665,10 +679,10 @@ var RoomMap = {
 		}
 	},
 
-	//Выбор масштаба колесиком мыши
-	selectScale: function(){
-		//Уменьшаем масштаб 
-		if(event.deltaY > 0){
+	//Выбор масштаба колесиком мыши или кнопками
+	selectScale: function(event, move){
+		//Уменьшаем масштаб
+		if(event.deltaY > 0 || move == 1){
 			//Проверим, есть ли меньший масштаб
 			for(var i = 0; i < RoomMap.scalesList.length; i++){
 				if(RoomMap.scalesList[i] == RoomMap.scale){
@@ -702,7 +716,7 @@ var RoomMap = {
 	},
 
 	//Движение подсказки
-	moveTitleSvgBlock: function(){
+	moveTitleSvgBlock: function(event){
 		if((event.pageX + RoomMap.$titlesvgblock.outerWidth() + 10) > RoomMap.mapWidth){
 			var x = event.pageX - 25 - RoomMap.$titlesvgblock.outerWidth();
 		}else{

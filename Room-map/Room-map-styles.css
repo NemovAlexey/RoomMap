@@ -1,10 +1,10 @@
-.mapBlock {
+.roomMapContentBlock {
 	overflow: hidden;
 	position: absolute;
 	background: url(/images/backgroundmap.jpg)
 }
 
-.logo {
+.roomMapContentBlock .logo {
 	width: 84px;
 	height: 30px;
 	position: absolute;
@@ -14,7 +14,7 @@
 	z-index: 2;
 }
 
-.layers {
+.roomMapContentBlock .layers {
 	width: 32px;
 	height: 32px;
 	position: absolute;
@@ -26,7 +26,7 @@
 	opacity: 0.5;
 }
 
-.levels {
+.roomMapContentBlock .levels {
 	width: 32px;
 	height: 32px;
 	position: absolute;
@@ -38,21 +38,21 @@
 	opacity: 0.5;
 }
 
-.frMainMap{
+.roomMapContentBlock .frMainMap{
 	z-index: 1;
 }
 
-.lrMainMap{
+.roomMapContentBlock .lrMainMap{
 	z-index: 2;
 }
 
-.scrolledmap {
+.roomMapContentBlock .scrolledmap {
   cursor:grab;
   cursor:-moz-grab;
   cursor:-webkit-grab;
 }
 
-#list {
+.roomMapContentBlock #list {
 	width: 100%;
 	height: 100px;
 	padding: 10px 20px 10px 20px;
@@ -64,7 +64,7 @@
 	opacity: 0.98;
 }
 
-#list .listItem{
+.roomMapContentBlock #list .listItem{
 	font: 11px Verdana;
 	color: #c3c3c3;
 	width: 120px;
@@ -76,16 +76,16 @@
 	cursor: pointer;
 }
 
-#list .listItem:hover {
+.roomMapContentBlock #list .listItem:hover {
 	border: 2px solid yellow;
 	color: black;
 }
 
-#list .listItem.selected {
+.roomMapContentBlock #list .listItem.selected {
 	border: 2px dashed rgb(199, 48, 48);
 }
 
-#list .listItem .listItemName {
+.roomMapContentBlock #list .listItem .listItemName {
 	position: absolute;
 	bottom: 13px;
 	width:110px;
@@ -94,7 +94,7 @@
 	padding: 5px;
 }
 
-.titlesvgblock {
+.roomMapContentBlock .titlesvgblock {
 	display: inline-table;
 	font: 11px Verdana;
 	border: 1px solid #c3c3c3;
@@ -105,29 +105,29 @@
 	z-index: 4;
 }
 
-svg {
+.roomMapContentBlock svg {
 	position: absolute;
 	z-index: 3;
 }
 
-svg .svgobject {
+.roomMapContentBlock svg .svgobject {
 	cursor: pointer;
 }
 
-svg .svgobject:hover {
+.roomMapContentBlock svg .svgobject:hover {
 	fill: yellow;
 	fill-opacity: 0.1;
 	stroke: blue;
 }
 
-.darkWall {
+.roomMapContentBlock .darkWall {
 	z-index: 5;
 	position: absolute;
 	background-color: black;
 	opacity: 0;
 }
 
-.loader {
+.roomMapContentBlock .loader {
 	background: url(/images/loader.gif);
 	width: 220px;
 	height: 19px;
@@ -135,7 +135,7 @@ svg .svgobject:hover {
 	position: absolute;
 }
 
-.svgDetailsBlock {
+.roomMapContentBlock .svgDetailsBlock {
 	position: absolute;
 	width: 200px;
 	height: 200px;
@@ -145,11 +145,11 @@ svg .svgobject:hover {
 }
 
 
-.svgDetailsBlock {
+.roomMapContentBlock .svgDetailsBlock {
 	border: 2px solid #c3c3c3;
 }
 
-.svgDetailsBlock .header {
+.roomMapContentBlock .svgDetailsBlock .header {
 	padding: 5px;
 	border-bottom: 1px solid #c3c3c3;
 	background: rgb(223, 223, 223);
@@ -158,7 +158,7 @@ svg .svgobject:hover {
 	color: #4B4B4B;
 }
 
-.svgDetailsBlock .content {
+.roomMapContentBlock .svgDetailsBlock .content {
 	padding: 10px;
 	font: 11px Verdana;
 	color: #4B4B4B;
@@ -166,7 +166,7 @@ svg .svgobject:hover {
 	box-sizing: border-box;
 }
 
-.location {
+.roomMapContentBlock .location {
 	position: absolute;
 	z-index: 4;
 	background: rgb(250, 250, 250);
@@ -175,11 +175,11 @@ svg .svgobject:hover {
 	opacity: 0.9;
 }
 
-.location .layer {
+.roomMapContentBlock .location .layer {
 	cursor: pointer;
 }
 
-.target {
+.roomMapContentBlock .target {
 	width: 5px;
 	height: 5px;
 	background: url(/images/target.png);
@@ -188,4 +188,28 @@ svg .svgobject:hover {
 	top: 50%;
 	left: 50%;
 	margin: -1px 0px 0px -2px;
+}
+
+.roomMapContentBlock .plus {
+	width: 17px;
+	height: 17px;
+	right: 17px;
+	top: 100px;
+	cursor: pointer;
+	opacity: 0.5;
+	background: url(/images/plus.png);
+	position: absolute;
+	z-index: 4;
+}
+
+.roomMapContentBlock .minus {
+	width: 17px;
+	height: 17px;
+	right: 17px;
+	top: 120px;
+	cursor: pointer;
+	opacity: 0.5;
+	background: url(/images/minus.png);
+	position: absolute;
+	z-index: 4;
 }
