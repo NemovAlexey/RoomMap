@@ -1,6 +1,5 @@
 //TODO вынести изменение координат в отдельную функцию
 //TODO снова проблемы с ресайзом
-//TODO сделать удаление svg при выходе из зоны
 
 var RoomMap = {
 	timeoutLoader: null,
@@ -19,7 +18,7 @@ var RoomMap = {
 			//Ждем загрузки всех зависимых файлов
 			RoomMap.timeoutLoader = setInterval(function(){
 				for(var i = 0; i < RoomMap.LoadMatrix.length; i++){
-					if(RoomMap.LoadMatrix[i] == 0) break;
+					if(RoomMap.LoadMatrix[i] == 0) return;
 				}
 				RoomMap.$mapBlock = $('#' + idElement).addClass('roomMapContentBlock');
 				RoomMap.createMap();
@@ -245,6 +244,39 @@ var RoomMap = {
 			var y = parseInt($(this).css('top'));
 			if(x < 0 - RoomMap.distanceForLostFragments - RoomMap.sizeOfFragment || x > RoomMap.mapWidth + RoomMap.distanceForLostFragments || y < 0 - RoomMap.distanceForLostFragments - RoomMap.sizeOfFragment || y > RoomMap.mapHeight + RoomMap.distanceForLostFragments){
 				$(this).remove();
+			}
+		});
+		$('circle, polygon',RoomMap.$svg).each(function(index,element){
+			var $element = $(element);
+			//Удаление кругов
+			if($element.attr('class').baseVal.indexOf('svgcircle') != -1){
+				var radius = $element.attr('r').baseVal.value;
+				var cx = $element.attr('cx').baseVal.value;
+				var cy = $element.attr('cy').baseVal.value;
+				if((cx + radius) < 0 || (cx - radius) > RoomMap.mapWidth || (cy + radius) < 0 || (cy - radius) > RoomMap.mapHeight){
+					$element.remove();
+				}
+			}
+			//Удаление полигонов
+			else if($element.attr('class').baseVal.indexOf('svgpolygon') != -1){
+				var min_x = min_y = max_x = max_y = 0;
+
+				for(var i = 0; i < $element.attr('points').length; i++){
+					if(i == 0){
+						min_x = $element.attr('points')[i].x;
+						max_x = $element.attr('points')[i].x;
+						min_y = $element.attr('points')[i].y;
+						max_y = $element.attr('points')[i].y;
+					}else{
+						if(min_x > $element.attr('points')[i].x) min_x = $element.attr('points')[i].x;
+						if(max_x < $element.attr('points')[i].x) max_x = $element.attr('points')[i].x;
+						if(min_y > $element.attr('points')[i].y) min_y = $element.attr('points')[i].y;
+						if(max_y < $element.attr('points')[i].y) max_y = $element.attr('points')[i].y;
+					}
+				}
+				if(max_x < 0 || min_x > RoomMap.mapWidth || max_y < 0 || min_y > RoomMap.mapHeight){
+					$element.remove();
+				}
 			}
 		});
 	},
