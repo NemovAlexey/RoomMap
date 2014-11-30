@@ -1,3 +1,4 @@
+<? session_start(); $_SESSION['editorMode'] = 1;?>
 <!doctype HTML>
 <html>
 	<head>
@@ -9,6 +10,7 @@
 			RoomMap.scale = <?= (int)$_GET['scale'] ?>;
 			RoomMap.layer = '<?= $_GET['layer'] ?>';
 			RoomMap.level = <?= (int)$_GET['level'] ?>;
+			RoomMap.editorMode = <?= (int)$_SESSION['editorMode'] ?>;
 			RoomMap.initMapTo('Room-map');
 		</script>
  	</head>

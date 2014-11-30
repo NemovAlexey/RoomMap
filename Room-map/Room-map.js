@@ -107,10 +107,26 @@ var RoomMap = {
 		//Установим лого
 		$('<div class="logo"></div>').appendTo(RoomMap.$mapBlock);
 
+		//Подключаем меню редактора, если залогинены
+		if(RoomMap.editorMode){
+			//Создаем меню редактора
+			RoomMap.editor.createEditorMenu();
+		}
+		
 		//Загружаем инструменты
 		if(RoomMap.tools){
-			RoomMap.LoadTools();
+			RoomMap.LoadCommonTools();
 		}
+
+		//Плавное изменение прозрачности при наведении на кнопки
+		$('.tool_btn').hover(function(){
+			if(!$(this).hasClass('active'))
+				$(this).animate({opacity:'1'},200);
+		},
+		function(){
+			if(!$(this).hasClass('active'))
+				$(this).animate({opacity:'0.5'},200);
+		});
 
 		//Блок для отображения текущего расположения
 		$('<div class="location"><span class="level"></span><span class="separator"></span><span class="layer" title="' + RoomMap.Langs.hidelayer + '"></span></div>').appendTo(RoomMap.$mapBlock).find('.layer').click(function(){
@@ -121,11 +137,13 @@ var RoomMap = {
 		//Прицел на центр карты
 		if(RoomMap.showTarget){
 			var target = $('<div class="target"></div>').appendTo(RoomMap.$mapBlock);
-			(function pulsar(){
-				target.fadeOut(500,function(){
-					target.fadeIn(500,pulsar);
-				})
-			})();
+			if(RoomMap.targetPulsar){
+				(function pulsar(){
+					target.fadeOut(500,function(){
+						target.fadeIn(500,pulsar);
+					})
+				})();
+			}
 		}
 		
 		//Создаем SVG холст
@@ -423,7 +441,15 @@ var RoomMap = {
 		newLink.type = 'text/css';
 		newLink.rel = 'stylesheet';
 		newLink.href = '/Room-map/Room-map-styles.css';
-		document.getElementsByTagName('head')[0].appendChild(newLink);		
+		document.getElementsByTagName('head')[0].appendChild(newLink);
+
+		//Для редакторов подключаем специальный файл
+		if(RoomMap.editorMode){
+			var newScript = document.createElement('script');
+			newScript.type = 'text/javascript';
+			newScript.src = '/Room-map/Room-map-editor.js';
+			document.getElementsByTagName('head')[0].appendChild(newScript);
+		}		
 	},
 	
 	//Подключение зависимых от подключенных ранее файлов
@@ -436,34 +462,27 @@ var RoomMap = {
 	},
 	
 	//Загрузка кнопок/инструментов
-	LoadTools: function(){
+	LoadCommonTools: function(){
+		//Общий блок для общих кнопок управления
+		RoomMap.$CommonTools = $('<div class="commonTools"></div>').appendTo(RoomMap.$mapBlock);
+
 		//Кнопка "слои"
-		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
 			RoomMap.ShowList('layers','layer',this);
 		});
 		//Кнопка "уровни"
-		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
 			RoomMap.ShowList('levels','level',this);
 		});
 
 		//Кнопка "плюс"
-		$('<div class="tool_btn plus" title="' + RoomMap.Langs.gocloser + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+		$('<div class="tool_btn plus" title="' + RoomMap.Langs.gocloser + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
 			RoomMap.selectScale({},-1);
 		});
 		//Кнопка "минус"
-		$('<div class="tool_btn minus" title="' + RoomMap.Langs.goaway + '"></div>').appendTo(RoomMap.$mapBlock).click(function(){
+		$('<div class="tool_btn minus" title="' + RoomMap.Langs.goaway + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
 			RoomMap.selectScale({},1);
 		});
-		
-		//Плавное изменение прозрачности при наведении
-		$('.tool_btn').hover(function(){
-			if(!$(this).hasClass('active'))
-				$(this).animate({opacity:'1'},200);
-		},
-		function(){
-			if(!$(this).hasClass('active'))
-				$(this).animate({opacity:'0.5'},200);
-		})
 	},
 	
 	//Загружает список доступных слоев, уровней

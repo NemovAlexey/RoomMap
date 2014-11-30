@@ -14,28 +14,34 @@
 	z-index: 2;
 }
 
-.roomMapContentBlock .layers {
-	width: 32px;
-	height: 32px;
+.roomMapContentBlock .commonTools {
 	position: absolute;
-	right: 10px;
-	top: 10px;
-	background: url(/images/layers.png);
+	right: 0px;
 	z-index: 4;
-	cursor: pointer;
-	opacity: 0.5;
 }
 
-.roomMapContentBlock .levels {
+.roomMapContentBlock .tool_btn {
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.roomMapContentBlock .tool_btn.active {
+	opacity: 1;
+}
+
+.roomMapContentBlock .commonTools .layers {
 	width: 32px;
 	height: 32px;
-	position: absolute;
-	right: 10px;
-	top: 50px;
+	margin-top: 10px;
+	margin-right: 10px;
+	background: url(/images/layers.png);
+}
+
+.roomMapContentBlock .commonTools .levels {
+	width: 32px;
+	height: 32px;
+	margin-right: 10px;
 	background: url(/images/levels.png);
-	z-index: 4;
-	cursor: pointer;
-	opacity: 0.5;
 }
 
 .roomMapContentBlock .frMainMap{
@@ -192,26 +198,57 @@
 	margin: -1px 0px 0px -2px;
 }
 
-.roomMapContentBlock .plus {
+.roomMapContentBlock .commonTools .plus {
 	width: 17px;
 	height: 17px;
-	right: 17px;
-	top: 100px;
 	cursor: pointer;
 	opacity: 0.5;
 	background: url(/images/plus.png);
-	position: absolute;
-	z-index: 4;
+	margin-top: 15px;
+	margin-left: 7px;
 }
 
-.roomMapContentBlock .minus {
+.roomMapContentBlock .commonTools .minus {
 	width: 17px;
 	height: 17px;
-	right: 17px;
-	top: 120px;
 	cursor: pointer;
 	opacity: 0.5;
 	background: url(/images/minus.png);
+	margin-top: 5px;
+	margin-left: 7px;
+}
+
+.roomMapContentBlock .modemenu {
+	width: 86px;
+	height: 32px;
+	z-index: 5;
+	left: 50%;
+	margin-left: -43px;
+	margin-top: -32px;
 	position: absolute;
-	z-index: 4;
+}
+
+.roomMapContentBlock .modemenu .selectmodemenu {
+	width: 63px;
+	height: 20px;
+	background: url(/images/selectmodemenu.png);
+	position: absolute;
+	cursor: pointer;
+	margin-left: 10px;
+	margin-top: 32px;
+	position: absolute;
+}
+
+.roomMapContentBlock .modemenu .modemenubuttons .modeshow {
+	width: 43px;
+	height: 32px;
+	background: white url(/images/mode_show.png);
+	display: inline-block;
+}
+
+.roomMapContentBlock .modemenu .modemenubuttons .modeedit {
+	width: 43px;
+	height: 32px;
+	background: white url(/images/mode_edit.png);
+	display: inline-block;
 }

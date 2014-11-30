@@ -21,6 +21,7 @@ RoomMap.scales = {
 
 //Показывать цель (центр карты)
 RoomMap.showTarget = true;
+RoomMap.targetPulsar = false;
 
 //Ограничение загрузки фрагментов по размеру карты
 RoomMap.loadFragmentsForSize = true;
@@ -55,3 +56,6 @@ RoomMap.levelDefault = 1;
 RoomMap.scale = RoomMap.scale || RoomMap.scaleDefault;
 RoomMap.layer = RoomMap.layer || RoomMap.layerDefault;
 RoomMap.level = RoomMap.level || RoomMap.levelDefault;
+
+//Режим редактирования
+RoomMap.editorMode = RoomMap.editorMode || false;

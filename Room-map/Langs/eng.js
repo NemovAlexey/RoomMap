@@ -4,5 +4,8 @@ RoomMap.Langs = {
 	svginfo: 'Information about object',
 	hidelayer: 'Hide layer',
 	gocloser: 'Closer',
-	goaway: 'Away'
+	goaway: 'Away',
+	modes: 'Modes',
+	mode_show: 'Show mode',
+	mode_edit: 'Edit mode'
 }
