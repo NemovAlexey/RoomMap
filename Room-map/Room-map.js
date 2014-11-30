@@ -110,7 +110,7 @@ var RoomMap = {
 		//Подключаем меню редактора, если залогинены
 		if(RoomMap.editorMode){
 			//Создаем меню редактора
-			RoomMap.editor.createEditorMenu();
+			RoomMap.editor.createEditorTools();
 		}
 		
 		//Загружаем инструменты
@@ -149,12 +149,13 @@ var RoomMap = {
 		//Создаем SVG холст
 		RoomMap.$svg = $('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
 		//Создаем блок для подсказок SVG и вешаем событие на него, чтобы отскакивал
-		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock).bind('mouseover mousemove',function(event){
-			//RoomMap.moveTitleSvgBlock(event);
-		});
+		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock);
 		//Движение подсказки при 'ходьбе' по SVG объекту
 		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
 			RoomMap.moveTitleSvgBlock(event);
+			if(!RoomMap.currentModeIsShowing()){
+				RoomMap.editor.updateCoor();
+			}
 		});
 			
 		//Блок для вывода информации об объекте
@@ -177,7 +178,7 @@ var RoomMap = {
 
 		//Обработчик прокрутки колесика (пока только для Chrome)
 		RoomMap.$svg.bind('wheel',function(){
-			if(typeof event != 'undefined'){
+			if(RoomMap.currentModeIsShowing() && typeof event != 'undefined'){
 				event.preventDefault();
 				RoomMap.selectScale(event);
 			}
@@ -468,20 +469,24 @@ var RoomMap = {
 
 		//Кнопка "слои"
 		$('<div class="tool_btn layers list" title="' + RoomMap.Langs.layers + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
-			RoomMap.ShowList('layers','layer',this);
+			if(RoomMap.currentModeIsShowing())
+				RoomMap.ShowList('layers','layer',this);
 		});
 		//Кнопка "уровни"
 		$('<div class="tool_btn levels list" title="' + RoomMap.Langs.levels + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
-			RoomMap.ShowList('levels','level',this);
+			if(RoomMap.currentModeIsShowing())
+				RoomMap.ShowList('levels','level',this);
 		});
 
 		//Кнопка "плюс"
 		$('<div class="tool_btn plus" title="' + RoomMap.Langs.gocloser + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
-			RoomMap.selectScale({},-1);
+			if(RoomMap.currentModeIsShowing())
+				RoomMap.selectScale({},-1);
 		});
 		//Кнопка "минус"
 		$('<div class="tool_btn minus" title="' + RoomMap.Langs.goaway + '"></div>').appendTo(RoomMap.$CommonTools).click(function(){
-			RoomMap.selectScale({},1);
+			if(RoomMap.currentModeIsShowing())
+				RoomMap.selectScale({},1);
 		});
 	},
 	
@@ -583,6 +588,7 @@ var RoomMap = {
 
 	//Загружает и выводит информацию о выделенном объекте
 	ShowDetails: function(){
+		if(!RoomMap.currentModeIsShowing()) return;
 		//Получаем идентификатор объекта, делаем запрос к серверу и возвращаем документ
 		var id = $(this).attr('id').match(/svg([0-9]+)/)[1];
 
@@ -685,6 +691,7 @@ var RoomMap = {
 		
 		//После того, как все фрагменты слоя удалились загружаем новые (если нужно)
 		//Таймаут чтобы не сработала блокировка загрузки (существующих фрагментов карт), т.к. они плавно исчезают
+		//TODO если быстро поменять масштаб и вернуть обратно, то некотоыре фрагменты не загрузятся
 		setTimeout(function(){
 			//Определяем список фрагментов
 			var listOfFragments = RoomMap.getListOfFragments(RoomMap.position_X, RoomMap.position_Y, RoomMap.mapWidth, RoomMap.mapHeight);
@@ -803,5 +810,11 @@ var RoomMap = {
 
 
 		RoomMap.$titlesvgblock.css({'top': event.originalEvent.offsetY + 'px','left': event.originalEvent.offsetX + 'px'});
+	},
+
+	//Проверяет текущий режим и возвращает TRUE в случае, если включен режим просмотра
+	currentModeIsShowing: function(){
+		if(typeof RoomMap.editor == 'undefined' || RoomMap.editor.currentmode == 'show') return true;
+		return false;
 	}
 }

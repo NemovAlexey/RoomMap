@@ -14,6 +14,13 @@
 	z-index: 2;
 }
 
+.roomMapContentBlock .editorTools {
+	position: absolute;
+	right: 0px;
+	z-index: 4;
+	margin-right: -50px;
+}
+
 .roomMapContentBlock .commonTools {
 	position: absolute;
 	right: 0px;
@@ -42,6 +49,30 @@
 	height: 32px;
 	margin-right: 10px;
 	background: url(/images/levels.png);
+}
+
+.roomMapContentBlock .editorTools .createCircle {
+	width: 30px;
+	height: 30px;
+	background: white url(/images/et_circle.png);
+	margin-top: 10px;
+	margin-right: 10px;
+}
+
+.roomMapContentBlock .editorTools .createPolygon {
+	width: 30px;
+	height: 30px;
+	background: white url(/images/et_polygon.png);
+	margin-top: 5px;
+	margin-right: 10px;
+}
+
+.roomMapContentBlock .editorTools .editObject {
+	width: 30px;
+	height: 30px;
+	background: white url(/images/et_edit.png);
+	margin-top: 15px;
+	margin-right: 10px;
 }
 
 .roomMapContentBlock .frMainMap{
@@ -251,4 +282,13 @@
 	height: 32px;
 	background: white url(/images/mode_edit.png);
 	display: inline-block;
+}
+
+.roomMapContentBlock .coordinateblock {
+	padding: 3px;
+	font: 10px Verdana;
+	position: absolute;
+	z-index: 4;
+	bottom: 0px;
+	background: rgba(255,255,255,0.9);
 }
