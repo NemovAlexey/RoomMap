@@ -1,3 +1,7 @@
+.roomMapContentBlock * {
+	outline: none;
+}
+
 .roomMapContentBlock {
 	overflow: hidden;
 	position: absolute;
@@ -291,4 +295,55 @@
 	z-index: 4;
 	bottom: 0px;
 	background: rgba(255,255,255,0.9);
+}
+
+.roomMapContentBlock .PropertiesForCircle {
+	position: absolute;
+	z-index: 4;
+	display: inline-block;
+	background: rgb(228, 228, 228);
+	padding: 4px;
+	border: 1px solid rgb(169, 169, 169);
+	left: 100px;
+	top: 100px;
+	box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.21);
+	display: inline-table;
+	opacity: 0;
+}
+
+.roomMapContentBlock .propBlock .dragArea {
+	width: 4px;
+	height: 10px;
+	float: left;
+	border-left: 1px dashed rgb(184, 184, 184);
+	cursor: move;
+}
+
+.roomMapContentBlock .propBlock .propArea {
+	float: left;
+}
+
+.roomMapContentBlock .PropertiesForCircle .dragArea {
+	height: 38px;
+}
+
+.roomMapContentBlock .PropertiesForCircle .propArea .inp {
+	width: 62px;
+	height: 10px;
+	font: 10px Verdana;
+	padding: 2px;
+	margin: 0px 1px;
+}
+
+.roomMapContentBlock .PropertiesForCircle .propArea .but {
+	width: 70px;
+	border: 1px solid rgb(136, 136, 136);
+	font: 10px Verdana;
+	margin: 0px 1px;
+	background: rgb(219, 219, 219);
+}
+
+.roomMapContentBlock .PropertiesForCircle .propArea .but:hover {
+	background: rgb(199, 199, 199);
+	cursor: pointer;
 }

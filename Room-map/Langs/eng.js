@@ -10,5 +10,11 @@ RoomMap.Langs = {
 	mode_edit: 'Edit mode',
 	add_circle: 'Add circle',
 	add_polygon: 'Add polygon',
-	edit_obj: 'Edit object'
+	edit_obj: 'Edit object',
+	create: 'Create',
+	save: 'Save',
+	radius: 'Radius',
+	coor_x: 'Coordinate X',
+	coor_y: 'Coordinate Y',
+	cancel: 'Cancel'
 }

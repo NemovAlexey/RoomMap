@@ -71,8 +71,6 @@ RoomMap.editor = {
 			return;
 		}
 
-		RoomMap.editor.currentmode = 'edit';
-
 		//Скрываем общие кнопки управления, если они есть
 		if(RoomMap.tools){
 			if($('.tool_btn.active',RoomMap.$CommonTools).length > 0){
@@ -86,6 +84,8 @@ RoomMap.editor = {
 			//Отображаем кнопки для управления объектами на карте
 			RoomMap.$EditorTools.animate({'margin-right':'0px'},100);
 		}
+
+		RoomMap.editor.currentmode = 'edit';
 
 		//Создание блока отображения координат курсора
 		RoomMap.$CoorBlock = $('<div class="coordinateblock"><span class="coor_x"></span> : <span class="coor_y"></span></div>').appendTo(RoomMap.$mapBlock);
@@ -107,7 +107,8 @@ RoomMap.editor = {
 
 	//Клик на кнопку создания окружности
 	createCircle: function(){
-		alert('circ');
+		//Создаем блок с параметрами
+		RoomMap.editor.createBlockPropertiesForCircle(null);
 	},
 
 	//Клик на кнопку создания полигона
@@ -124,6 +125,49 @@ RoomMap.editor = {
 	updateCoor: function(){
 		$('.coor_x',RoomMap.$CoorBlock).text((Math.ceil(RoomMap.mapWidth/2 - event.offsetX - RoomMap.position_X/RoomMap.scales[RoomMap.scale][0]) * RoomMap.scales[RoomMap.scale][0] * -1).toFixed(2));
 		$('.coor_y',RoomMap.$CoorBlock).text((Math.ceil(RoomMap.mapHeight/2 - event.offsetY + RoomMap.position_Y/RoomMap.scales[RoomMap.scale][0]) * RoomMap.scales[RoomMap.scale][0]).toFixed(2));;
+	},
+
+	//Создает блок свойств объекта для окружности
+	createBlockPropertiesForCircle: function(object){
+		//Если объект существует, то заполняем данными
+		if(object != null){
+			var radius = 0;
+			var coor_x = 0;
+			var coor_y = 0;
+		}
+		//Иначе создаем пустой
+		else{
+			var radius = 0;
+			var coor_x = 0;
+			var coor_y = 0;
+		}
+
+		//Создаем блок
+		$propBlock = $('<div class="PropertiesForCircle propBlock"><div class="dragArea"></div><div class="propArea"><div><input type="text" class="objRadius inp"  value="' + radius + '" title="' + RoomMap.Langs.radius + '" /><input type="text" class="objCoorX inp" value="' + coor_x + '" title="' + RoomMap.Langs.coor_x + '" /><input type="text" class="objCoorY inp" value="' + coor_y + '" title="' + RoomMap.Langs.coor_y + '" /></div><div><input type="button" class="createObj but" value="' + RoomMap.Langs.create + '" /><input type="button" class="saveObj but" value="' + RoomMap.Langs.save + '" /><input type="button" class="cancelObj but" value="' + RoomMap.Langs.cancel + '" /></div></div></div>').appendTo(RoomMap.$mapBlock).animate({'opacity':1},100);
+
+		//Обработчик сдвига блока
+		RoomMap.editor.AddDragEvent($propBlock.find('.dragArea'));
+	
+	},
+
+	//Создает обработчик сдвига блока свойств
+	AddDragEvent: function($dragArea){
+		$block = $dragArea.closest('.propBlock');
+		$dragArea.bind('mousedown',function(){
+			var offset_x = event.offsetX + RoomMap.$mapBlock.offset().left + 6;
+			var offset_y = event.offsetY + RoomMap.$mapBlock.offset().top + 6;
+			RoomMap.$mapBlock.bind('mousemove',function(){
+				event.preventDefault();
+				if(event.clientX > offset_x && event.clientY > offset_y && event.clientX < RoomMap.mapWidth && event.clientY < RoomMap.mapHeight){
+					$block.css('left',event.clientX - offset_x);
+					$block.css('top',event.clientY - offset_y);
+				}
+			});
+		});
+		$dragArea.bind('mouseup',function(){
+			RoomMap.$mapBlock.unbind('mousemove');
+		});
+
 	}
 
 
