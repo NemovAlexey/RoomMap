@@ -163,6 +163,12 @@
 	stroke: blue;
 }
 
+.roomMapContentBlock svg .svgobject.new {
+	fill: red;
+	fill-opacity: 0.1;
+	stroke: red;
+}
+
 .roomMapContentBlock .darkWall {
 	z-index: 5;
 	position: absolute;

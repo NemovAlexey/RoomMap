@@ -267,6 +267,12 @@ var RoomMap = {
 		});
 		$('circle, polygon',RoomMap.$svg).each(function(index,element){
 			var $element = $(element);
+
+			//Не удаляем созданные объекты
+			if(!RoomMap.currentModeIsShowing() && $element.attr('class').baseVal.indexOf('new') != -1){
+				return;
+			}
+
 			//Удаление кругов
 			if($element.attr('class').baseVal.indexOf('svgcircle') != -1){
 				var radius = $element.attr('r').baseVal.value;
@@ -581,7 +587,7 @@ var RoomMap = {
 
 			//Добавляем обработчик кликов и вставляем в документ
 			$(newObject).bind('click',RoomMap.ShowDetails);
-			document.getElementsByTagName('svg')[0].appendChild(newObject);
+			RoomMap.$svg.get(0).appendChild(newObject);
 			
 		});
 	},
