@@ -16,5 +16,6 @@ RoomMap.Langs = {
 	radius: 'Radius',
 	coor_x: 'Coordinate X',
 	coor_y: 'Coordinate Y',
-	cancel: 'Cancel'
+	cancel: 'Cancel',
+	createvis: 'Visual'
 }

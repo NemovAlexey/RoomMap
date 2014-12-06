@@ -349,7 +349,15 @@
 	background: rgb(219, 219, 219);
 }
 
+.roomMapContentBlock .PropertiesForCircle .propArea .but.double {
+	width: 142px;
+}
+
 .roomMapContentBlock .PropertiesForCircle .propArea .but:hover {
 	background: rgb(199, 199, 199);
 	cursor: pointer;
+}
+
+.roomMapContentBlock .PropertiesForCircle .propArea .but.but_hidden {
+	display: none;
 }
