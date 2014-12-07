@@ -17,5 +17,9 @@ RoomMap.Langs = {
 	coor_x: 'Coordinate X',
 	coor_y: 'Coordinate Y',
 	cancel: 'Cancel',
-	createvis: 'Visual'
+	createvis: 'Visual',
+	new_object: 'New object',
+	point: 'Point',
+	removepoint: 'Remove this point'
+	addpoint: 'Add point'
 }

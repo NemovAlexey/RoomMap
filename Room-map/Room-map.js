@@ -578,12 +578,8 @@ var RoomMap = {
 			newObject.setAttributeNS(null,"fill","black");
 			newObject.setAttributeNS(null,"fill-opacity","0.0");
 			
-			$(newObject).bind('mouseover',function(event){
-				RoomMap.$titlesvgblock.stop().html(data.title).animate({'opacity':0.8},200);
-			});
-			$(newObject).bind('mouseout',function(){
-				RoomMap.$titlesvgblock.animate({'opacity':0},200);
-			});
+			//Обработчик наведения на объект (показ подсказки - title)
+			RoomMap.addTitle($(newObject),data.title);
 
 			//Добавляем обработчик кликов и вставляем в документ
 			$(newObject).bind('click',RoomMap.ShowDetails);
@@ -822,5 +818,15 @@ var RoomMap = {
 	currentModeIsShowing: function(){
 		if(typeof RoomMap.editor == 'undefined' || RoomMap.editor.currentmode == 'show') return true;
 		return false;
+	},
+
+	//Добавляет обработчик наведения на объект - показ title
+	addTitle: function($obj, title){
+		$obj.bind('mouseover',function(event){
+			RoomMap.$titlesvgblock.stop().html(title).animate({'opacity':0.8},200);
+		});
+		$obj.bind('mouseout',function(){
+			RoomMap.$titlesvgblock.animate({'opacity':0},200);
+		});
 	}
 }

@@ -303,7 +303,8 @@
 	background: rgba(255,255,255,0.9);
 }
 
-.roomMapContentBlock .PropertiesForCircle {
+.roomMapContentBlock .PropertiesForCircle, 
+.roomMapContentBlock .PropertiesForPoly {
 	position: absolute;
 	z-index: 4;
 	display: inline-block;
@@ -333,7 +334,12 @@
 	height: 38px;
 }
 
-.roomMapContentBlock .PropertiesForCircle .propArea .inp {
+.roomMapContentBlock .PropertiesForPoly .dragArea {
+	height: 76px;
+}
+
+.roomMapContentBlock .PropertiesForCircle .propArea .inp,
+.roomMapContentBlock .PropertiesForPoly .propArea .inp {
 	width: 62px;
 	height: 10px;
 	font: 10px Verdana;
@@ -341,7 +347,8 @@
 	margin: 0px 1px;
 }
 
-.roomMapContentBlock .PropertiesForCircle .propArea .but {
+.roomMapContentBlock .PropertiesForCircle .propArea .but,
+.roomMapContentBlock .PropertiesForPoly .propArea .but {
 	width: 70px;
 	border: 1px solid rgb(136, 136, 136);
 	font: 10px Verdana;
@@ -349,15 +356,47 @@
 	background: rgb(219, 219, 219);
 }
 
-.roomMapContentBlock .PropertiesForCircle .propArea .but.double {
+.roomMapContentBlock .PropertiesForCircle .propArea .but.double,
+.roomMapContentBlock .PropertiesForPoly .propArea .but.double {
 	width: 142px;
 }
 
-.roomMapContentBlock .PropertiesForCircle .propArea .but:hover {
+.roomMapContentBlock .PropertiesForCircle .propArea .but:hover,
+.roomMapContentBlock .PropertiesForPoly .propArea .but:hover {
 	background: rgb(199, 199, 199);
 	cursor: pointer;
 }
 
-.roomMapContentBlock .PropertiesForCircle .propArea .but.but_hidden {
+.roomMapContentBlock .PropertiesForCircle .propArea .but.but_hidden,
+.roomMapContentBlock .PropertiesForPoly .propArea .but.but_hidden {
 	display: none;
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea .pointTitle {
+	font: 10px Verdana;
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea .pointRemove {
+	color: rgb(203, 203, 203);
+	font: 10px Verdana;
+	cursor: pointer;
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea.created .pointRemove {
+	color: red;
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea .pointAdd {
+	font: 11px Verdana;
+	color: green;
+	cursor: pointer;
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea .listPairs {
+	overflow: hidden;
+	/*height: 57px;*/
+}
+
+.roomMapContentBlock .PropertiesForPoly .propArea .pairs:hover {
+	background: rgb(215, 215, 215);
 }

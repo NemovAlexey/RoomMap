@@ -17,5 +17,9 @@ RoomMap.Langs = {
 	coor_x: 'Координата X',
 	coor_y: 'Координата Y',
 	cancel: 'Отмена',
-	createvis: 'Визуально'
+	createvis: 'Визуально',
+	new_object: 'Новый объект',
+	point: 'Точка',
+	removepoint: 'Удалить точку',
+	addpoint: 'Добавить точку'
 }
