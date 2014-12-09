@@ -1,6 +1,7 @@
 RoomMap.editor = {
 	currentmode: 'show',	//Текущий режим (show - просмотр, edit - редактирование)
 	propblockisthere: 0,	//Вызван ли блок для создания/редактирования объекта
+	currentCreatePoint: 0,
 	//Создает меню для выбора режима, а так же инструменты для редактирования карты
 	createEditorTools: function(){
 		//Создание меню выбора режима
@@ -259,7 +260,7 @@ RoomMap.editor = {
 	
 	//Обработчик нажатия на кнопку "создать"
 	ActionCreate: function(){
-		var $propBlock = $(event.target).closest('.propBlock');
+		var $propBlock = RoomMap.editor.propblock;
 		$propBlock.find('.hidden_after_create').hide();
 		$propBlock.find('.show_after_create').show();
 		//Для окружности
@@ -303,7 +304,32 @@ RoomMap.editor = {
 		else{
 			//Визуальное создание
 			if($(event.target).hasClass('createObjVis')){
+				RoomMap.editor.currentCreatePoint = 0;
+				//Обработка двойного клика по карте
+				RoomMap.$svg.bind('dblclick.editor',function(){
+					//При первом клике создаем объект - полигон
+					var click_x = RoomMap.mapWidth/2 - (RoomMap.position_X - RoomMap.editor.coor_x)/RoomMap.scales[RoomMap.scale][0];
+					var click_y = RoomMap.mapHeight/2 + (RoomMap.position_Y - RoomMap.editor.coor_y)/RoomMap.scales[RoomMap.scale][0];
+					if(RoomMap.editor.currentCreatePoint == 0) {
+						$propBlock.data('obj',RoomMap.editor.createSvgPoly(click_x + ',' + click_y));
+					}else{
+						$obj = $(RoomMap.editor.propblock.data('obj'));
+						//Создаем новую точку и задаем координаты
+						$obj.attr('points').appendItem(RoomMap.$svg.get(0).createSVGPoint());
+						$obj.attr('points')[RoomMap.editor.currentCreatePoint].x = click_x;
+						$obj.attr('points')[RoomMap.editor.currentCreatePoint].y = click_y;
+					}
+					//Вставляем координаты в инпут
+					//Смотрим, есть ли блок с парой инпутов и создаем его если нет
+					if(!$propBlock.find('.pair_' + (RoomMap.editor.currentCreatePoint + 1)).length){
+						RoomMap.editor.addInputForPoly(RoomMap.editor.coor_x,RoomMap.editor.coor_y);
+					}else{
+						$propBlock.find('.pair_' + (RoomMap.editor.currentCreatePoint + 1)).find('.objCoorX').val(RoomMap.editor.coor_x);
+						$propBlock.find('.pair_' + (RoomMap.editor.currentCreatePoint + 1)).find('.objCoorY').val(RoomMap.editor.coor_y);
+					}
 
+					RoomMap.editor.currentCreatePoint++;
+				});
 			}else{
 				//Определяем координаты в пикс.
 				var arrayCoors = [];
@@ -396,6 +422,8 @@ RoomMap.editor = {
 	addPoint: function(){
 		//Если полигон уже существует, добавляем инпуты и саму точку
 		if(RoomMap.editor.propblock.data('obj') != null){
+			//Если идет визуальное создание, увеличиваем счетчик
+			RoomMap.editor.currentCreatePoint += 1;
 			//Добавляем точку в svg
 			$(RoomMap.editor.propblock.data('obj')).attr('points').appendItem(RoomMap.$svg.get(0).createSVGPoint());
 
@@ -423,6 +451,9 @@ RoomMap.editor = {
 		var $listPairs = $(this).parents('.listPairs');
 		//Если полигон уже существует, удаляем саму точку
 		if(RoomMap.editor.propblock.data('obj') != null){
+			//Если идет визуальное создание, уменьшаем счетчик
+			RoomMap.editor.currentCreatePoint -= 1;
+			//Удаляем точку
 			var point_remove = $(this).parents('.pairs').attr('class').match(/pair_([0-9]+)/)[1];			
 			$obj.attr('points').removeItem(point_remove-1);
 		}
@@ -438,7 +469,7 @@ RoomMap.editor = {
 		//Проверяем, достаточно ли точек для активации удаления
 		if(i <= 3) RoomMap.editor.propblock.find('.propArea').removeClass('created');
 		//Если удалили последний инпут, то выставим новую кнопку для добавления точки
-		$listPairs.find('.pairs:last').find('.pointAdd').text('+');
+		$listPairs.find('.pairs:last').find('.pointAdd').text('+').attr('title',RoomMap.Langs.addpoint);
 	},
 
 	//Добавляет инпут для полигона

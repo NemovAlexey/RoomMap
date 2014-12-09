@@ -826,7 +826,7 @@ var RoomMap = {
 			RoomMap.$titlesvgblock.stop().html(title).animate({'opacity':0.8},200);
 		});
 		$obj.bind('mouseout',function(){
-			RoomMap.$titlesvgblock.animate({'opacity':0},200);
+			RoomMap.$titlesvgblock.stop().animate({'opacity':0},200);
 		});
 	}
 }
