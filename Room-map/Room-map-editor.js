@@ -401,8 +401,8 @@ RoomMap.editor = {
 
 			//Корректируем положение точки (с небольшим смещением с вектора {X1:Xn})
 			$obj = $(RoomMap.editor.propblock.data('obj'));
-			var x = ($obj.attr('points')[0].x + $obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length - 1].x + 2)/2;
-			var y = ($obj.attr('points')[0].y + $obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length - 1].y + 2)/2;
+			var x = ($obj.attr('points')[0].x + $obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length - 1].x)/2 + 5;
+			var y = ($obj.attr('points')[0].y + $obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length - 1].y )/2 + 5;
 
 			$obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length].x = x;
 			$obj.attr('points')[RoomMap.editor.propblock.find('.pairs').length].y = y;
@@ -419,12 +419,26 @@ RoomMap.editor = {
 	//Удаление точки из полигона
 	removePoint: function(){
 		if(RoomMap.editor.propblock.find('.pairs').length <= 3) return;
-		//Если полигон уже существует, удаляем инпуты и саму точку
+		$obj = $(RoomMap.editor.propblock.data('obj'));
+		var $listPairs = $(this).parents('.listPairs');
+		//Если полигон уже существует, удаляем саму точку
 		if(RoomMap.editor.propblock.data('obj') != null){
-
-		}else{
-
+			var point_remove = $(this).parents('.pairs').attr('class').match(/pair_([0-9]+)/)[1];			
+			$obj.attr('points').removeItem(point_remove-1);
 		}
+		//Удаляем инпут
+		$(this).parents('.pairs').remove();
+		//Обновляем номера
+		var i  = 0;
+		$listPairs.find('.pairs').each(function(index,element){
+			$(element).attr('class',$(element).attr('class').replace(/pair_[0-9]+/,'pair_' + (index + 1)));
+			$(element).find('.pointTitle').text($(element).find('.pointTitle').text().replace(/([0-9]+)/,index + 1));
+			i++;
+		});
+		//Проверяем, достаточно ли точек для активации удаления
+		if(i <= 3) RoomMap.editor.propblock.find('.propArea').removeClass('created');
+		//Если удалили последний инпут, то выставим новую кнопку для добавления точки
+		$listPairs.find('.pairs:last').find('.pointAdd').text('+');
 	},
 
 	//Добавляет инпут для полигона
