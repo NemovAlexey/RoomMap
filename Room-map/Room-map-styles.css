@@ -79,6 +79,10 @@
 	margin-right: 10px;
 }
 
+.roomMapContentBlock .editorTools .tool_btn.active {
+	background-color: rgb(245, 245, 245);
+}
+
 .roomMapContentBlock .frMainMap{
 	z-index: 1;
 }
@@ -356,6 +360,10 @@
 	background: rgb(219, 219, 219);
 }
 
+.roomMapContentBlock .PropertiesForPoly .propArea .but.cancelpoly {
+	width: 95px;
+}
+
 .roomMapContentBlock .PropertiesForCircle .propArea .but.double,
 .roomMapContentBlock .PropertiesForPoly .propArea .but.double {
 	width: 142px;
@@ -393,8 +401,9 @@
 }
 
 .roomMapContentBlock .PropertiesForPoly .propArea .listPairs {
-	overflow: hidden;
-	/*height: 57px;*/
+	overflow: auto;
+	max-height: 95px;
+	width: 240px;
 }
 
 .roomMapContentBlock .PropertiesForPoly .propArea .pairs:hover {
