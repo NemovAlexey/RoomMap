@@ -21,5 +21,10 @@ RoomMap.Langs = {
 	new_object: 'Новый объект',
 	point: 'Точка',
 	removepoint: 'Удалить точку',
-	addpoint: 'Добавить точку'
+	addpoint: 'Добавить точку',
+	editobject: 'Редактирование объекта',
+	createobject: 'Создание объекта',
+	saveobject: 'Сохранить',
+	svgtitle: 'Подсказка',
+	svgdescription: 'Описание'
 }

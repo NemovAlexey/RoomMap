@@ -266,7 +266,7 @@ RoomMap.editor = {
 	
 	//Обработчик нажатия на кнопку "отмена"
 	ActionCancel: function(){
-		//Отменяет изменения и закрывает блок
+		//Закрывает блок с параметрами и перезагружает объекты
 		if(typeof RoomMap.editor.propblock != 'undefined' && RoomMap.editor.propblock.length){
 			RoomMap.editor.propblock.animate({'opacity':0},200,function(){$(this).remove()});
 			//Удаляем новый объект
@@ -278,15 +278,17 @@ RoomMap.editor = {
 				$('*',RoomMap.$svg).remove();
 				RoomMap.loadSvg();
 			}
-			RoomMap.$svg.unbind('.editor');
-			RoomMap.editor.propblockisthere = 0;
-			RoomMap.editor.dropCurrentEditorTool();
-		}
+		}			
+		RoomMap.$svg.unbind('.editor');
+		RoomMap.editor.propblockisthere = 0;
+		RoomMap.editor.dropCurrentEditorTool();
 	},
 
 	//Обработчик нажатия на кнопку "сохранить"
 	ActionSave: function(){
-		alert('s');
+		//Создаем блок для заполнения
+		var $obj = $(RoomMap.editor.propblock.data('obj'));
+		RoomMap.editor.createSaveDescriptionBlock($obj);
 	},
 	
 	//Обработчик нажатия на кнопку "создать"
@@ -563,6 +565,132 @@ RoomMap.editor = {
 	//Снимает выделение иконки используемого инструмента
 	dropCurrentEditorTool: function(){
 		$('.tool_btn',RoomMap.$EditorTools).removeClass('active').trigger('mouseout');		
+	},
+
+	//Создание блока для заполнения
+	createSaveDescriptionBlock: function($obj){
+		//Еcли блок не новый, а редактируемый, то загружаем существующую информацию
+		if(RoomMap.editor.propblockisthere == 3){
+			//Загружает данные
+			RoomMap.editor.loadSvgData($obj);
+			//Получим title
+			var title = '';
+			$.each(RoomMap.svg,function(index,object){
+				if('svg' + object.id == $obj.attr('id')){
+					title = object.title;
+				}
+			});
+		}
+
+		//Формируем строку параметров для хранения в бд
+		var params = {};
+		var type = '';
+		var min_x = 0;
+		var min_y = 0;
+		var max_x = 0;
+		var max_y = 0;
+		//Окружности
+		if($obj.attr('class').baseVal.indexOf('svgcircle') != -1){
+			params['r'] = parseInt(RoomMap.editor.propblock.find('.objRadius').val());
+			type = 'circle';
+			min_x = parseInt(RoomMap.editor.propblock.find('.objCoorX').val()) - params['r']/2;
+			min_y = parseInt(RoomMap.editor.propblock.find('.objCoorY').val()) - params['r']/2;
+			max_x = parseInt(RoomMap.editor.propblock.find('.objCoorX').val()) + params['r']/2;
+			max_y = parseInt(RoomMap.editor.propblock.find('.objCoorY').val()) + params['r']/2;
+		}
+		//Полигоны
+		else if($obj.attr('class').baseVal.indexOf('svgpolygon') != -1){
+			params['points'] = [];
+			RoomMap.editor.propblock.find('.pairs').each(function(index,element){
+				var x = parseInt($(element).find('.objCoorX').val());
+				var y = parseInt($(element).find('.objCoorY').val());
+				params['points'].push([x,y]);
+				if(!index || x > max_x) max_x = x;
+				if(!index || x < min_x) min_x = x;
+				if(!index || y > max_y) max_y = y;
+				if(!index || y < min_y) min_y = y;
+			});
+			type = 'polygon';
+		}
+
+		var object = JSON.stringify({"type":type,"params":params});
+		var coords = JSON.stringify({"min_x":min_x,"min_y":min_y,"max_x":max_x,"max_y":max_y});
+
+		//Создание блока для редактирования
+		RoomMap.editor.darkWall = RoomMap.createDarkWall();
+		RoomMap.editor.saveBlock = $('<div class="blockSave"><div class="header">' + (RoomMap.editor.propblockisthere == 3 ? RoomMap.Langs.editobject + ' "' + title + '"' : RoomMap.Langs.createobject) + '</div><div class="blocktitle"><input placeholder="' + RoomMap.Langs.svgtitle + '" /></div><div class="blockdescription"><textarea placeholder="' + RoomMap.Langs.svgdescription + '"></textarea></div><div class="blockbuttons"><div class="savebutton">' + RoomMap.Langs.saveobject + '</div><div class="loader"></div></div></div>').appendTo(RoomMap.$mapBlock).animate({'opacity':1},100);
+		RoomMap.editor.saveBlock.data('object',object);
+		RoomMap.editor.saveBlock.data('coords',coords);
+		RoomMap.editor.saveBlock.data('id_description','');
+		RoomMap.editor.saveBlock.data('id_title','');
+		if($obj.attr('id') != '') RoomMap.editor.saveBlock.data('objid',$obj.attr('id').match(/([0-9]+)/)[1]);
+		else RoomMap.editor.saveBlock.data('objid','');
+
+		RoomMap.editor.saveBlock.find('.savebutton').click(RoomMap.editor.saveData);
+	},
+
+	//Загружает данные о редактируемом объекте
+	loadSvgData: function($obj){
+		var id = $obj.attr('id').match(/svg([0-9]+)/)[1];
+		$.ajax({
+			url: '/Room-map/Room-map-remote.php',
+			type: 'post',
+			data: {
+				'data': 'getSvgDataForEdit',
+				'id': id,
+				'level': RoomMap.level,
+				'layer': RoomMap.layer
+			},
+			dataType: 'json',
+			success: function(data){
+				RoomMap.editor.saveBlock.find('.blocktitle input').val(data.title);
+				RoomMap.editor.saveBlock.find('.blockdescription textarea').val(data.content);
+				RoomMap.editor.saveBlock.data('id_description',data.id_description);
+				RoomMap.editor.saveBlock.data('id_title',data.id_title);
+			}
+		});
+	},
+
+	//Сохранение инофрмации о блоке
+	saveData: function(){
+		RoomMap.editor.saveBlock.addClass('saving');
+		//Отправка данных на сервер
+		$.ajax({
+			url: '/Room-map/Room-map-remote.php',
+			type: 'post',
+			data: {
+				'data': 'saveData',
+				'id_obj': RoomMap.editor.saveBlock.data('objid'),
+				'object': RoomMap.editor.saveBlock.data('object'),
+				'coords': RoomMap.editor.saveBlock.data('coords'),
+				'id_description': RoomMap.editor.saveBlock.data('id_description'),
+				'id_title': RoomMap.editor.saveBlock.data('id_title'),
+				'title': RoomMap.editor.saveBlock.find('.blocktitle input').val(),
+				'content': RoomMap.editor.saveBlock.find('.blockdescription textarea').val(),
+				'level': RoomMap.level,
+				'layer': RoomMap.layer,
+				'new': RoomMap.editor.propblockisthere != 3 ? 1 : 0
+			},
+			success: function(data){
+
+				if(data == '0') return;
+				// Скрываем блоки
+				RoomMap.editor.propblock.animate({'opacity':0},200,function(){$(this).remove()});
+				RoomMap.editor.saveBlock.animate({'opacity':0},200,function(){$(this).remove()});
+				RoomMap.editor.darkWall.animate({'opacity':0},200,function(){$(this).remove()});
+
+				// Перезагружаем объекты
+				$('*',RoomMap.$svg).remove();
+				RoomMap.loadSvg();
+				
+				RoomMap.$svg.unbind('.editor');
+				RoomMap.editor.propblockisthere = 0;
+				RoomMap.editor.dropCurrentEditorTool();
+			},
+			error: function(){
+				RoomMap.editor.saveBlock.removeClass('saving');
+			}
+		});
 	}
 
 }

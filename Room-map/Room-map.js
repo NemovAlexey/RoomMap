@@ -500,7 +500,7 @@ var RoomMap = {
 	LoadLinks: function(){
 		$.ajax({
 			url: '/Room-map/Room-map-remote.php',
-			type: 'get',
+			type: 'post',
 			data: {
 				'data': 'getlists'
 			},
@@ -519,7 +519,7 @@ var RoomMap = {
 	loadSvg: function(){
 		$.ajax({
 			url: '/Room-map/Room-map-remote.php',
-			type: 'get',
+			type: 'post',
 			data: {
 				'data': 'getsvg',
  				'min_x': RoomMap.position_X - (RoomMap.mapWidth * RoomMap.scales[RoomMap.scale][0] / 2),
@@ -596,7 +596,7 @@ var RoomMap = {
 
 		var ajax = $.ajax({
 			url: '/Room-map/Room-map-remote.php',
-			type: 'get',
+			type: 'post',
 			dataType: 'json',
 			data: {
 				data: 'getdetails',
@@ -621,7 +621,8 @@ var RoomMap = {
 		var loader = $('<div class="loader"></div>').css({'margin-left': -110 + RoomMap.mapWidth/2 + 'px', 'margin-top': -10 + RoomMap.mapHeight/2 + 'px'}).appendTo(RoomMap.$mapBlock);
 		
 		//Создаем блок-занавес и вешаем обработчик на клик
-		var darkWall = $('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100).bind('click',function(){
+		var $darkWall = RoomMap.createDarkWall();
+		$darkWall.bind('click',function(){
 			RoomMap.$svgDetailsBlock.fadeOut(100);
 			$(this).add('.loader',RoomMap.$mapBlock).animate({opacity: 0},100).queue(function(){$(this).remove()});
 			ajax.abort();
@@ -810,7 +811,6 @@ var RoomMap = {
 			RoomMap.$titlesvgblock.data('offsetY','top');
 		}
 
-
 		RoomMap.$titlesvgblock.css({'top': event.originalEvent.offsetY + 'px','left': event.originalEvent.offsetX + 'px'});
 	},
 
@@ -828,5 +828,10 @@ var RoomMap = {
 		$obj.bind('mouseout',function(){
 			RoomMap.$titlesvgblock.stop().animate({'opacity':0},200);
 		});
+	},
+
+	//Создает темный занавес
+	createDarkWall: function(){
+		return $('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100);
 	}
 }

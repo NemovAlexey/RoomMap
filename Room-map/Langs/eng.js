@@ -21,5 +21,10 @@ RoomMap.Langs = {
 	new_object: 'New object',
 	point: 'Point',
 	removepoint: 'Remove this point'
-	addpoint: 'Add point'
+	addpoint: 'Add point',
+	editobject: 'Editing object',
+	createobject: 'Creating new object',
+	saveobject: 'Save',
+	svgtitle: 'Title',
+	svgdescription: 'Description'
 }

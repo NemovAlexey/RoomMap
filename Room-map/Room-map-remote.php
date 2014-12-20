@@ -64,15 +64,91 @@ function  getSvgObjectDetails($svg_id, $level){
 }
 
 
-switch($_GET['data']){
+/*
+* @return array - description, title 
+*/
+function getSvgDataForEdit($id){
+	// Проверка логина
+	session_start();
+	if(!$_SESSION['editorMode']) return array('error' => 'Login error');
+
+
+	$query = "SELECT 
+					o.id as id_object,
+					t.id_title,
+					t.title,
+					d.id_description,
+					d.content
+				FROM objects o 
+				LEFT JOIN titles t ON o.id_title = t.id_title
+				LEFT JOIN descriptions d ON o.id_description = d.id_description
+					WHERE o.id = ".$id;
+
+	$data = $GLOBALS['database']->Query($query);
+	return $row = $data->Fetch(PDO::FETCH_ASSOC);
+}
+
+
+/*
+* @return bool - true в случае успеха
+*/
+function saveData($dataArray){
+	// Проверка логина
+	session_start();
+	if(!$_SESSION['editorMode']) return 0;
+
+	// Новый объект
+	if($dataArray['new']){
+		// Добавляем подсказку
+		$data = $GLOBALS['database']->Query("SELECT MAX(id_title) + 1 as new_id_title FROM titles");
+		$id_title = $data->fetchColumn();
+		$query = "INSERT INTO titles (id_title,id_level,title,last_update) VALUES (".$id_title.",".$dataArray['level'].",'".$dataArray['title']."',NOW())";
+		$GLOBALS['database']->Query($query);
+
+		// Добавляем описание
+		$data = $GLOBALS['database']->Query("SELECT MAX(id_description) + 1 as new_id_description FROM descriptions");
+		$id_description = $data->fetchColumn();
+		$query = "INSERT INTO descriptions (id_description,id_level,content) VALUES (".$id_description.", ".$dataArray['level'].",'".$dataArray['content']."')";
+		$GLOBALS['database']->Query($query);
+
+		// Добавляем объект
+		$coords = json_decode($dataArray['coords'],1);
+		$query = "INSERT INTO objects (id,id_levels,id_layer,min_x,min_y,max_x,max_y,id_title,id_description,content) VALUES (NULL,".$dataArray['level'].",".$dataArray['layer'].",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",".$id_title.",".$id_description.",'".$dataArray['object']."')";
+		$GLOBALS['database']->Query($query);
+	}
+	// Редактирование существующего
+	else{
+		// Обновляем объект
+		$coords = json_decode($dataArray['coords'],1);
+		$query = "UPDATE objects SET content = '".$dataArray['object']."', min_x = '".$coords['min_x']."', min_y = '".$coords['min_y']."', max_x = '".$coords['max_x']."', max_y = '".$coords['max_y']."' WHERE id = ".$dataArray['id_obj'];
+		$GLOBALS['database']->Query($query);
+		// Обновляем подсказку
+		$query = "UPDATE titles SET title = '".$dataArray['title']."' WHERE id_title = ".$dataArray['id_title'];
+		$GLOBALS['database']->Query($query);
+		// Обновляем описание
+		$query = "UPDATE descriptions SET content = '".$dataArray['content']."' WHERE id_description = ".$dataArray['id_description'];
+		$GLOBALS['database']->Query($query);
+	}
+
+	return 1;
+}
+
+
+switch($_POST['data']){
 	case 'getlists': 
 		echo json_encode(array('layers' => getLayersList(), 'levels' => getLevelsList()));
 		break;
 	case 'getsvg':
-		echo json_encode(array('svg' => getListSVGObject($_GET['min_x'],$_GET['min_y'],$_GET['max_x'],$_GET['max_y'],$_GET['level'],$_GET['layer'])));
+		echo json_encode(array('svg' => getListSVGObject($_POST['min_x'],$_POST['min_y'],$_POST['max_x'],$_POST['max_y'],$_POST['level'],$_POST['layer'])));
 		break;
 	case 'getdetails':
-		echo json_encode(array('details' => getSvgObjectDetails((int)$_GET['object_id'], (int)$_GET['level'])));
+		echo json_encode(array('details' => getSvgObjectDetails((int)$_POST['object_id'], (int)$_POST['level'])));
+		break;
+	case 'getSvgDataForEdit':
+		echo json_encode(getSvgDataForEdit((int)$_POST['id']));
+		break;
+	case 'saveData':
+		echo saveData($_POST);
 		break;
 }
 
