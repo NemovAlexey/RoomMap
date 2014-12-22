@@ -552,9 +552,9 @@ var RoomMap = {
 				var newObject = document.createElementNS('http://www.w3.org/2000/svg',"circle"); 
 				newObject.setAttributeNS(null,"class","svgobject svgcircle");
 
-				newObject.setAttributeNS(null,"cx",left  + parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
-				newObject.setAttributeNS(null,"cy",top - parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
-				newObject.setAttributeNS(null,"r",parseInt(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"cx",left + parseFloat(data.content.params.r/2/RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"cy",top - parseFloat(data.content.params.r/2/RoomMap.scales[RoomMap.scale][0]));
+				newObject.setAttributeNS(null,"r",parseFloat(data.content.params.r/RoomMap.scales[RoomMap.scale][0]));
 
 			}
 			//Создаем полигон
