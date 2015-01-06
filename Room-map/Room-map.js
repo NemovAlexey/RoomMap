@@ -574,7 +574,6 @@ var RoomMap = {
 			}
 			
 			newObject.setAttributeNS(null,"id","svg" + data.id);
-			newObject.setAttributeNS(null,"iddescription", data.id_description);
 			newObject.setAttributeNS(null,"fill","black");
 			newObject.setAttributeNS(null,"fill-opacity","0.0");
 			

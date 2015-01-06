@@ -621,8 +621,6 @@ RoomMap.editor = {
 		RoomMap.editor.saveBlock = $('<div class="blockSave"><div class="header">' + (RoomMap.editor.propblockisthere == 3 ? RoomMap.Langs.editobject + ' "' + title + '"' : RoomMap.Langs.createobject) + '</div><div class="blocktitle"><input placeholder="' + RoomMap.Langs.svgtitle + '" /></div><div class="blockdescription"><textarea placeholder="' + RoomMap.Langs.svgdescription + '"></textarea></div><div class="blockbuttons"><div class="savebutton">' + RoomMap.Langs.saveobject + '</div><div class="loader"></div></div></div>').appendTo(RoomMap.$mapBlock).animate({'opacity':1},100);
 		RoomMap.editor.saveBlock.data('object',object);
 		RoomMap.editor.saveBlock.data('coords',coords);
-		RoomMap.editor.saveBlock.data('id_description','');
-		RoomMap.editor.saveBlock.data('id_title','');
 		if($obj.attr('id') != '') RoomMap.editor.saveBlock.data('objid',$obj.attr('id').match(/([0-9]+)/)[1]);
 		else RoomMap.editor.saveBlock.data('objid','');
 
@@ -644,9 +642,7 @@ RoomMap.editor = {
 			dataType: 'json',
 			success: function(data){
 				RoomMap.editor.saveBlock.find('.blocktitle input').val(data.title);
-				RoomMap.editor.saveBlock.find('.blockdescription textarea').val(data.content);
-				RoomMap.editor.saveBlock.data('id_description',data.id_description);
-				RoomMap.editor.saveBlock.data('id_title',data.id_title);
+				RoomMap.editor.saveBlock.find('.blockdescription textarea').val(data.description);
 			}
 		});
 	},
@@ -663,8 +659,6 @@ RoomMap.editor = {
 				'id_obj': RoomMap.editor.saveBlock.data('objid'),
 				'object': RoomMap.editor.saveBlock.data('object'),
 				'coords': RoomMap.editor.saveBlock.data('coords'),
-				'id_description': RoomMap.editor.saveBlock.data('id_description'),
-				'id_title': RoomMap.editor.saveBlock.data('id_title'),
 				'title': RoomMap.editor.saveBlock.find('.blocktitle input').val(),
 				'content': RoomMap.editor.saveBlock.find('.blockdescription textarea').val(),
 				'level': RoomMap.level,

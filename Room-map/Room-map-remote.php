@@ -33,17 +33,16 @@ function getLevelsList(){
 function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 	if(!$layer) $layer = 'IS NULL';
 	else $layer = "= '".$layer."'";
-	$query = "SELECT o.id, o.min_x, o.min_y, o.max_x, o.max_y, t.title, o.id_description, o.content FROM objects o
+	$query = "SELECT o.id, o.min_x, o.min_y, o.max_x, o.max_y, o.title, o.content FROM objects o
 					LEFT JOIN layers l ON o.id_layer = l.id_layer
-					LEFT JOIN titles t ON o.id_title = t.id_title
 						WHERE l.layer_code ".$layer."
-							AND FIND_IN_SET(".$level.",o.id_levels)
+							AND o.id_level = ".$level."
 							AND ((o.min_x >= ".$xMin." AND o.min_x <= ".$xMax." AND o.min_y >= ".$yMin." AND o.min_y <= ".$yMax.") OR (o.max_x <= ".$xMax." AND o.max_x >= ".$xMin." AND o.max_y <= ".$yMax." AND o.max_y >= ".$yMin."))";
 	
 	$objects = $GLOBALS['database']->Query($query);
  	$listOfSVG = array();
 	while($object = $objects->Fetch(PDO::FETCH_ASSOC)){
-		array_push($listOfSVG,array('id' => $object['id'], 'min_x' => $object['min_x'], 'min_y' => $object['min_y'], 'max_x' => $object['max_x'], 'max_y' => $object['max_y'], 'title' => $object['title'], 'id_description' => $object['id_description'],'content' => $object['content']));
+		array_push($listOfSVG,array('id' => $object['id'], 'min_x' => $object['min_x'], 'min_y' => $object['min_y'], 'max_x' => $object['max_x'], 'max_y' => $object['max_y'], 'title' => $object['title'], 'content' => $object['content']));
 	}
 	return $listOfSVG;
 }
@@ -52,15 +51,13 @@ function getListSVGObject($xMin, $yMin, $xMax, $yMax, $level, $layer){
 * @return string HTML код - описание объекта
 */
 function  getSvgObjectDetails($svg_id, $level){
-	$query = "SELECT d.content FROM objects o
-				LEFT JOIN descriptions d ON o.id_description = d.id_description
-					WHERE o.id = ".$svg_id."
-						AND FIND_IN_SET(".$level.",d.id_level)";
+	sleep(1);
+	$query = "SELECT description FROM objects WHERE id = ".$svg_id;
 
 	$objects = $GLOBALS['database']->Query($query);
 	$object = $objects->Fetch(PDO::FETCH_ASSOC);
 
-	return $object['content'];
+	return $object['description'];
 }
 
 
@@ -75,14 +72,9 @@ function getSvgDataForEdit($id){
 
 	$query = "SELECT 
 					o.id as id_object,
-					t.id_title,
-					t.title,
-					d.id_description,
-					d.content
-				FROM objects o 
-				LEFT JOIN titles t ON o.id_title = t.id_title
-				LEFT JOIN descriptions d ON o.id_description = d.id_description
-					WHERE o.id = ".$id;
+					o.title,
+					o.description
+				FROM objects o WHERE o.id = ".$id;
 
 	$data = $GLOBALS['database']->Query($query);
 	return $row = $data->Fetch(PDO::FETCH_ASSOC);
@@ -99,34 +91,20 @@ function saveData($dataArray){
 
 	// Новый объект
 	if($dataArray['new']){
-		// Добавляем подсказку
-		$data = $GLOBALS['database']->Query("SELECT MAX(id_title) + 1 as new_id_title FROM titles");
-		$id_title = $data->fetchColumn();
-		$query = "INSERT INTO titles (id_title,id_level,title,last_update) VALUES (".$id_title.",".$dataArray['level'].",'".$dataArray['title']."',NOW())";
-		$GLOBALS['database']->Query($query);
-
-		// Добавляем описание
-		$data = $GLOBALS['database']->Query("SELECT MAX(id_description) + 1 as new_id_description FROM descriptions");
-		$id_description = $data->fetchColumn();
-		$query = "INSERT INTO descriptions (id_description,id_level,content) VALUES (".$id_description.", ".$dataArray['level'].",'".$dataArray['content']."')";
-		$GLOBALS['database']->Query($query);
+		// Идентификатор слоя
+		$data = $GLOBALS['database']->Query("SELECT id_layer FROM layers WHERE layer_code = '".$dataArray['layer']."'");
+		$id_layer = $data->fetchColumn();
 
 		// Добавляем объект
 		$coords = json_decode($dataArray['coords'],1);
-		$query = "INSERT INTO objects (id,id_levels,id_layer,min_x,min_y,max_x,max_y,id_title,id_description,content) VALUES (NULL,".$dataArray['level'].",".$dataArray['layer'].",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",".$id_title.",".$id_description.",'".$dataArray['object']."')";
+		$query = "INSERT INTO objects (id,id_level,id_layer,min_x,min_y,max_x,max_y,title,description,content) VALUES (NULL,".$dataArray['level'].",".$id_layer.",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",'".$dataArray['title']."','".$dataArray['content']."','".$dataArray['object']."')";
 		$GLOBALS['database']->Query($query);
 	}
 	// Редактирование существующего
 	else{
 		// Обновляем объект
 		$coords = json_decode($dataArray['coords'],1);
-		$query = "UPDATE objects SET content = '".$dataArray['object']."', min_x = '".$coords['min_x']."', min_y = '".$coords['min_y']."', max_x = '".$coords['max_x']."', max_y = '".$coords['max_y']."' WHERE id = ".$dataArray['id_obj'];
-		$GLOBALS['database']->Query($query);
-		// Обновляем подсказку
-		$query = "UPDATE titles SET title = '".$dataArray['title']."' WHERE id_title = ".$dataArray['id_title'];
-		$GLOBALS['database']->Query($query);
-		// Обновляем описание
-		$query = "UPDATE descriptions SET content = '".$dataArray['content']."' WHERE id_description = ".$dataArray['id_description'];
+		$query = "UPDATE objects SET content = '".$dataArray['object']."', min_x = '".$coords['min_x']."', min_y = '".$coords['min_y']."', max_x = '".$coords['max_x']."', max_y = '".$coords['max_y']."', title = '".$dataArray['title']."', description = '".$dataArray['content']."' WHERE id = ".$dataArray['id_obj'];
 		$GLOBALS['database']->Query($query);
 	}
 
