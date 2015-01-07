@@ -130,6 +130,7 @@ var RoomMap = {
 
 		//Блок для отображения текущего расположения
 		$('<div class="location"><span class="level"></span><span class="separator"></span><span class="layer" title="' + RoomMap.Langs.hidelayer + '"></span></div>').appendTo(RoomMap.$mapBlock).find('.layer').click(function(){
+			if(!RoomMap.currentModeIsShowing()) return;
 			//При клике на слой, скрывает его
 			RoomMap.selectItemList(['layer',RoomMap.layer]);
 		});
@@ -190,14 +191,21 @@ var RoomMap = {
 	
 	//Определение необходимых к загрузке фрагментов
 	getListOfFragments: function(position_X, position_Y, mapWidth, mapHeight){
+		position_X = position_X/RoomMap.scales[RoomMap.scale][0];
+		position_Y = position_Y/RoomMap.scales[RoomMap.scale][0];
 		//Определим в каких фрагментах находятся нижний левый и правый верхний углы
 		//Нижний левый угол
-		var xMin = ((position_X - ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) < 0 ? Math.floor((position_X - ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) : Math.ceil((position_X - ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]);
-		var yMin = ((position_Y - ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) < 0 ? Math.floor((position_Y - ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) : Math.ceil((position_Y - ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]);
-		//Правый верхний угол
-		var xMax = ((position_X + ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) < 0 ? Math.floor((position_X + ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) : Math.ceil((position_X + ((mapWidth + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]);
-		var yMax = ((position_Y + ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) < 0 ? Math.floor((position_Y + ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]) : Math.ceil((position_Y + ((mapHeight + RoomMap.distanceForNewFragments * 2) * RoomMap.scales[RoomMap.scale][0]/2))/RoomMap.scales[RoomMap.scale][1]);
-		
+		var xMin = (position_X - ((mapWidth + RoomMap.distanceForNewFragments * 2)/2))/RoomMap.sizeOfFragment;
+			xMin = xMin < 0 ? Math.floor(xMin) : Math.ceil(xMin);
+		var yMin = (position_Y - ((mapHeight + RoomMap.distanceForNewFragments * 2)/2))/RoomMap.sizeOfFragment;
+			yMin = yMin < 0 ? Math.floor(yMin) : Math.ceil(yMin);
+
+		//Верхний правый угол
+		var xMax = (position_X + ((mapWidth + RoomMap.distanceForNewFragments * 2)/2))/RoomMap.sizeOfFragment;
+			xMax = xMax < 0 ? Math.floor(xMax) : Math.ceil(xMax);
+		var yMax = (position_Y + ((mapHeight + RoomMap.distanceForNewFragments * 2)/2))/RoomMap.sizeOfFragment;
+			yMax = yMax < 0 ? Math.floor(yMax) : Math.ceil(yMax);
+
 		//Составим список фрагментов
 		var fragments = [];
 		for(var x = xMin; x <= xMax; x++){
@@ -415,6 +423,7 @@ var RoomMap = {
 
 	//Обновление URL при изменениях
 	updateUrl: function(objParams){
+		if(!RoomMap.urlupdate) return;
 		var l = location.search;
 		if(l == ''){
 			l = '?';
@@ -499,7 +508,7 @@ var RoomMap = {
 	//Загружает список доступных слоев, уровней
 	LoadLinks: function(){
 		$.ajax({
-			url: '/Room-map/Room-map-remote.php',
+			url: RoomMap.ajaxUrl,
 			type: 'post',
 			data: {
 				'data': 'getlists'
@@ -518,7 +527,7 @@ var RoomMap = {
 	//Загружает SVG объекты
 	loadSvg: function(){
 		$.ajax({
-			url: '/Room-map/Room-map-remote.php',
+			url: RoomMap.ajaxUrl,
 			type: 'post',
 			data: {
 				'data': 'getsvg',
@@ -594,7 +603,7 @@ var RoomMap = {
 		var id = $(this).attr('id').match(/svg([0-9]+)/)[1];
 
 		var ajax = $.ajax({
-			url: '/Room-map/Room-map-remote.php',
+			url: RoomMap.ajaxUrl,
 			type: 'post',
 			dataType: 'json',
 			data: {
@@ -604,14 +613,16 @@ var RoomMap = {
 			},
 			success: function(data){
 				loader.remove();
-				if(data.details != null && data.details.length > 0){
+				if(data.details.indexOf('<script') != -1 || (data.details == null && data.details.length == 0)) {
+					// Скрываем блок-занавес если обнаружены следы скрипта или описание отсутствует
+					$darkWall.animate({opacity:0},100,function(){$(this).remove();});
+				}
+				else {
 					// Показываем блок и выводим информацию
 					RoomMap.$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
 					RoomMap.$svgDetailsBlock.fadeIn(100,function(){
 						RoomMap.$svgDetailsBlock.find('.content').css({'height':  RoomMap.$svgDetailsBlock.height() - RoomMap.$svgDetailsBlock.find('.header').outerHeight() + 'px'});
 					});
-				}else{
-					darkWall.animate({opacity:0},100,function(){$(this).remove();});
 				}
 			}
 		});

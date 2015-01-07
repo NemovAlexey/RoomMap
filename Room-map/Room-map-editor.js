@@ -631,7 +631,7 @@ RoomMap.editor = {
 	loadSvgData: function($obj){
 		var id = $obj.attr('id').match(/svg([0-9]+)/)[1];
 		$.ajax({
-			url: '/Room-map/Room-map-remote.php',
+			url: RoomMap.ajaxUrl,
 			type: 'post',
 			data: {
 				'data': 'getSvgDataForEdit',
@@ -652,7 +652,7 @@ RoomMap.editor = {
 		RoomMap.editor.saveBlock.addClass('saving');
 		//Отправка данных на сервер
 		$.ajax({
-			url: '/Room-map/Room-map-remote.php',
+			url: RoomMap.ajaxUrl,
 			type: 'post',
 			data: {
 				'data': 'saveData',

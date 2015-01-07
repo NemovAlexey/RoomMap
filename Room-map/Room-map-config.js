@@ -1,6 +1,6 @@
 //Размеры блока
-RoomMap.mapWidth = 800;
-RoomMap.mapHeight = 400;
+RoomMap.mapWidth = 1000;
+RoomMap.mapHeight = 500;
 
 //На весь экран
 RoomMap.fullScreen = false;
@@ -46,6 +46,12 @@ RoomMap.pathForFragments = '/maps';
 
 //Язык интерефейса
 RoomMap.lang = 'rus';
+
+//Обновлять ли URL при манипуляции картой
+RoomMap.urlupdate = false;
+
+//URL AJAX запросов
+RoomMap.ajaxUrl = '/Room-map/Room-map-remote.php';
 
 //Параметры по умолчанию
 RoomMap.scaleDefault = 400;
