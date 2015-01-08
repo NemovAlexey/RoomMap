@@ -73,11 +73,11 @@ var RoomMap = {
 				
 				//Сдвигаем фрагменты карт
 				RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
-					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
-						if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
+					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').indexOf('svgobject') != -1){
+						if($(fragment).attr('class').indexOf('svgcircle') != -1){
 							fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
 							fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
-						}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
+						}else if($(fragment).attr('class').indexOf('svgpolygon') != -1){
 							//Для полигонов перебираем все точки
 							var newPoints = [];
 							for(i = 0; i < $(fragment).attr('points').length; i++){
@@ -151,13 +151,18 @@ var RoomMap = {
 		RoomMap.$svg = $('<svg class="svg" style="width: ' + RoomMap.mapWidth + 'px; height: ' + RoomMap.mapHeight + 'px;"></svg>').appendTo(RoomMap.$mapBlock);
 		//Создаем блок для подсказок SVG и вешаем событие на него, чтобы отскакивал
 		RoomMap.$titlesvgblock = $('<div class="titlesvgblock"></div>').appendTo(RoomMap.$mapBlock);
-		//Движение подсказки при 'ходьбе' по SVG объекту
+		
+		//Обновление координат при движении курсора по карте (в режиме редактирования)
 		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
-			RoomMap.moveTitleSvgBlock(event);
 			if(!RoomMap.currentModeIsShowing()){
 				RoomMap.editor.updateCoor();
 			}
 		});
+
+		//Движение подсказки при 'ходьбе' по SVG объекту
+		$(document).bind('mousemove',function(event){
+			RoomMap.moveTitleSvgBlock(event);
+		})
 			
 		//Блок для вывода информации об объекте
 		RoomMap.$svgDetailsBlock = $('<div class="svgDetailsBlock"><div class="header">' + RoomMap.Langs.svginfo + '</div><div class="content"></div></div>').appendTo(RoomMap.$mapBlock).css({width: 0.5 * RoomMap.mapWidth + 'px', height: 0.8 * RoomMap.mapHeight + 'px', 'margin-left': (RoomMap.mapWidth - RoomMap.mapWidth*0.5)/2 + 'px', 'margin-top': (RoomMap.mapHeight - RoomMap.mapHeight*0.8)/2 + 'px'});
@@ -186,7 +191,7 @@ var RoomMap = {
 		});
 
 		//Отключаем скролл при отпускании кнопки мыши вне карты
-		$().mouseup(RoomMap.scrollMapCancel);
+		$(document).mouseup(RoomMap.scrollMapCancel);
 	},
 	
 	//Определение необходимых к загрузке фрагментов
@@ -277,21 +282,21 @@ var RoomMap = {
 			var $element = $(element);
 
 			//Не удаляем созданные объекты
-			if(!RoomMap.currentModeIsShowing() && $element.attr('class').baseVal.indexOf('new') != -1){
+			if(!RoomMap.currentModeIsShowing() && $element.attr('class').indexOf('new') != -1){
 				return;
 			}
 
 			//Удаление кругов
-			if($element.attr('class').baseVal.indexOf('svgcircle') != -1){
-				var radius = $element.attr('r').baseVal.value;
-				var cx = $element.attr('cx').baseVal.value;
-				var cy = $element.attr('cy').baseVal.value;
+			if($element.attr('class').indexOf('svgcircle') != -1){
+				var radius = $element.attr('r').value;
+				var cx = $element.attr('cx').value;
+				var cy = $element.attr('cy').value;
 				if((cx + radius) < 0 || (cx - radius) > RoomMap.mapWidth || (cy + radius) < 0 || (cy - radius) > RoomMap.mapHeight){
 					$element.remove();
 				}
 			}
 			//Удаление полигонов
-			else if($element.attr('class').baseVal.indexOf('svgpolygon') != -1){
+			else if($element.attr('class').indexOf('svgpolygon') != -1){
 				var min_x = min_y = max_x = max_y = 0;
 
 				for(var i = 0; i < $element.attr('points').length; i++){
@@ -324,10 +329,10 @@ var RoomMap = {
 		this.setAttributeNS(null,"class","svg scrolledmap");
 
 		//Обработчик движения мыши
-		$().bind('mousemove touchmove',function(event){
+		$(document).bind('mousemove.scroll touchmove.scroll',function(event){
 			var current_X = event.clientX || event.originalEvent.touches[0].clientX;
 			var current_Y = event.clientY || event.originalEvent.touches[0].clientY;
-			
+
 			var dY = default_Y - current_Y;
 			var dX = default_X - current_X;
 			
@@ -374,18 +379,19 @@ var RoomMap = {
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
 			RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
-				if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
-					if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
+				if(typeof $(fragment).attr('class') != 'undefined' && $(fragment).attr('class').indexOf('svgobject') != -1){
+					if($(fragment).attr('class').indexOf('svgcircle') != -1){
 						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
 						fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
-					}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
+					}else if($(fragment).attr('class').indexOf('svgpolygon') != -1){
 						//Для полигонов перебираем все точки
 						var newPoints = [];
-						for(i = 0; i < $(fragment).attr('points').length; i++){
-							var x = $(fragment).attr('points')[i].x - dX;
-							var y = $(fragment).attr('points')[i].y - dY
+						for(i = 0; i < fragment.points.length; i++){
+							var x = fragment.points[i].x - dX;
+							var y = fragment.points[i].y - dY
 							newPoints.push([x + ',' + y]);
 						}
+						
 						fragment.setAttributeNS(null,'points',newPoints.join(' '));
 					}
 				}else{
@@ -411,7 +417,8 @@ var RoomMap = {
 
 	//Заканчиваем скролл карты
 	scrollMapCancel: function(){
-		$().unbind('mousemove touchmove');
+		//Все события скролла удаляем
+		$(document).unbind('.scroll');
 		var svgelement = RoomMap.$mapBlock.find('svg').get(0);
 		svgelement.setAttributeNS(null,'class','svg');
 		//Удаляем фрагменты карт
@@ -613,11 +620,13 @@ var RoomMap = {
 			},
 			success: function(data){
 				loader.remove();
-				if(data.details.indexOf('<script') != -1 || (data.details == null && data.details.length == 0)) {
-					// Скрываем блок-занавес если обнаружены следы скрипта или описание отсутствует
+				if((data.details == null && data.details.length == 0)) {
+					// Скрываем блок-занавес если описание отсутствует
 					$darkWall.animate({opacity:0},100,function(){$(this).remove();});
 				}
 				else {
+					// Если обнаружены следы скрипта - удаляем содержимое
+					if(data.details.indexOf('<script') != -1) data.details = RoomMap.Langs.content_blocked;
 					// Показываем блок и выводим информацию
 					RoomMap.$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
 					RoomMap.$svgDetailsBlock.fadeIn(100,function(){
@@ -791,31 +800,37 @@ var RoomMap = {
 	moveTitleSvgBlock: function(event){
 		var offsetX = 15;
 		if((event.originalEvent.offsetX + RoomMap.$titlesvgblock.outerWidth() + offsetX) > RoomMap.mapWidth){
-			//Плавно перетаскиваем блок в другую сторону
+			//Плавно перетаскиваем блок влево
 			if(RoomMap.$titlesvgblock.data('offsetX') == 'right'){
-				RoomMap.$titlesvgblock.animate({'margin-left': -(offsetX + RoomMap.$titlesvgblock.outerWidth()) + 'px'},100);
+				//RoomMap.$titlesvgblock.clearQueue('fx').queue('fx',function(){$(this).animate({'margin-left': -(offsetX + RoomMap.$titlesvgblock.outerWidth()) + 'px'},100);$(this).dequeue();});
+				RoomMap.$titlesvgblock.css({'margin-left': -(offsetX + RoomMap.$titlesvgblock.outerWidth()) + 'px'});
 			}
 
 			RoomMap.$titlesvgblock.data('offsetX','left');
 		}else{
-			//Плавно перетаскиваем блок в другую сторону
+			//Плавно перетаскиваем блок вправо
 			if(RoomMap.$titlesvgblock.data('offsetX') == 'left'){
-				RoomMap.$titlesvgblock.animate({'margin-left': offsetX + 'px'},100);
+				//RoomMap.$titlesvgblock.clearQueue('fx').queue('fx',function(){$(this).animate({'margin-left': offsetX + 'px'},100);$(this).dequeue();});
+				RoomMap.$titlesvgblock.css({'margin-left': offsetX + 'px'});
 			}
 
 			RoomMap.$titlesvgblock.data('offsetX','right');
 		}
 
 		var offsetY = 30;
-		if((event.originalEvent.offsetY - offsetY < 0)){
+		if((event.originalEvent.offsetY - offsetY) < 0){
+			//Плавно перетаскиваем блок вниз
 			if(RoomMap.$titlesvgblock.data('offsetY') == 'top'){
-				RoomMap.$titlesvgblock.animate({'margin-top': offsetY + 'px'},100);
+				//RoomMap.$titlesvgblock.clearQueue('tx').queue('tx',function(){$(this).animate({'margin-top': offsetY + 'px'},100);$(this).dequeue();});
+				RoomMap.$titlesvgblock.css({'margin-top': offsetY + 'px'});
 			}
 
 			RoomMap.$titlesvgblock.data('offsetY','bottom');
 		}else{
+			//Плавно перетаскиваем блок вверх
 			if(RoomMap.$titlesvgblock.data('offsetY') == 'bottom'){
-				RoomMap.$titlesvgblock.animate({'margin-top': -offsetY + 'px'},100);
+				//RoomMap.$titlesvgblock.clearQueue('tx').queue('tx',function(){$(this).animate({'margin-top': -offsetY + 'px'},100);$(this).dequeue();})
+				RoomMap.$titlesvgblock.css({'margin-top': -offsetY + 'px'});
 			}
 
 			RoomMap.$titlesvgblock.data('offsetY','top');

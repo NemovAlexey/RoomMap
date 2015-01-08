@@ -26,5 +26,6 @@ RoomMap.Langs = {
 	createobject: 'Создание объекта',
 	saveobject: 'Сохранить',
 	svgtitle: 'Подсказка',
-	svgdescription: 'Описание'
+	svgdescription: 'Описание',
+	content_blocked: 'Подозрительный контент заблокирован'
 }

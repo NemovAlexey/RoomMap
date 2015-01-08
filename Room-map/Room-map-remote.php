@@ -93,11 +93,11 @@ function saveData($dataArray){
 	if($dataArray['new']){
 		// Идентификатор слоя
 		$data = $GLOBALS['database']->Query("SELECT id_layer FROM layers WHERE layer_code = '".$dataArray['layer']."'");
-		$id_layer = $data->fetchColumn();
+		$id_layer = (int)$data->fetchColumn();
 
 		// Добавляем объект
 		$coords = json_decode($dataArray['coords'],1);
-		$query = "INSERT INTO objects (id,id_level,id_layer,min_x,min_y,max_x,max_y,title,description,content) VALUES (NULL,".$dataArray['level'].",".$id_layer.",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",'".$dataArray['title']."','".$dataArray['content']."','".$dataArray['object']."')";
+		echo $query = "INSERT INTO objects (id,id_level,id_layer,min_x,min_y,max_x,max_y,title,description,content) VALUES (NULL,".$dataArray['level'].",".$id_layer.",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",'".$dataArray['title']."','".$dataArray['content']."','".$dataArray['object']."')";
 		$GLOBALS['database']->Query($query);
 	}
 	// Редактирование существующего
