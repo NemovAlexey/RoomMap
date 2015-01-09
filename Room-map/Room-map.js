@@ -667,14 +667,14 @@ var RoomMap = {
 			RoomMap.$mapBlock.find('#list div.listItem').animate({opacity:0},100).queue(function(){
 				RoomMap.$mapBlock.find('#list div.listItem').remove();
 				$.each(RoomMap[listName],function(index,item){
-					$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({opacity:0,background:'url(/images/' + listName + '/' + item.code + '.png) no-repeat'}).animate({opacity:1},200);
+					$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo('#list').data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({opacity:0,background:'url(/maps/' + listName + '/' + item.code + '.png) no-repeat'}).animate({opacity:1},200);
 				});
 			});
 		}else{
 			//Создаем блок, вставляем список и выводим его
 			var list = $('<div id="list"></div>').appendTo(RoomMap.$mapBlock);
 			$.each(RoomMap[listName],function(index,item){
-				$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo(list).data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({background:'url(/images/' + listName + '/' + item.code + '.png) no-repeat'});
+				$('<div class="listItem ' + (RoomMap[itemType] == item.code ? 'selected' : '') + '" title="' + item.description[RoomMap.lang] + '"><div class="listItemName">' + item.name[RoomMap.lang] + '</div></div>').appendTo(list).data('code',item.code).data('type',itemType).bind('click',function(){RoomMap.selectItemList([$(this).data('type'),$(this).data('code')]);}).css({background:'url(/maps/' + listName + '/' + item.code + '.png) no-repeat'});
 				
 			});
 			list.animate({bottom: '0px'},200);

@@ -5,7 +5,7 @@
 .roomMapContentBlock {
 	overflow: hidden;
 	position: absolute;
-	background: url(/images/backgroundmap.jpg)
+	background: url(images/backgroundmap.jpg)
 }
 
 .roomMapContentBlock .logo {
@@ -14,7 +14,7 @@
 	position: absolute;
 	right: 0px;
 	bottom: 0px;
-	background: url(/images/logo.png);
+	background: url(images/logo.png);
 	z-index: 2;
 }
 
@@ -45,20 +45,20 @@
 	height: 32px;
 	margin-top: 10px;
 	margin-right: 10px;
-	background: url(/images/layers.png);
+	background: url(images/layers.png);
 }
 
 .roomMapContentBlock .commonTools .levels {
 	width: 32px;
 	height: 32px;
 	margin-right: 10px;
-	background: url(/images/levels.png);
+	background: url(images/levels.png);
 }
 
 .roomMapContentBlock .editorTools .createCircle {
 	width: 30px;
 	height: 30px;
-	background: white url(/images/et_circle.png);
+	background: white url(images/et_circle.png);
 	margin-top: 10px;
 	margin-right: 10px;
 }
@@ -66,7 +66,7 @@
 .roomMapContentBlock .editorTools .createPolygon {
 	width: 30px;
 	height: 30px;
-	background: white url(/images/et_polygon.png);
+	background: white url(images/et_polygon.png);
 	margin-top: 5px;
 	margin-right: 10px;
 }
@@ -74,7 +74,7 @@
 .roomMapContentBlock .editorTools .editObject {
 	width: 30px;
 	height: 30px;
-	background: white url(/images/et_edit.png);
+	background: white url(images/et_edit.png);
 	margin-top: 15px;
 	margin-right: 10px;
 }
@@ -181,7 +181,7 @@
 }
 
 .roomMapContentBlock .loader {
-	background: url(/images/loader.gif);
+	background: url(images/loader.gif);
 	width: 220px;
 	height: 19px;
 	z-index: 6;
@@ -235,7 +235,7 @@
 .roomMapContentBlock .target {
 	width: 5px;
 	height: 5px;
-	background: url(/images/target.png);
+	background: url(images/target.png);
 	z-index: 4;
 	position: absolute;
 	top: 50%;
@@ -248,7 +248,7 @@
 	height: 17px;
 	cursor: pointer;
 	opacity: 0.5;
-	background: url(/images/plus.png);
+	background: url(images/plus.png);
 	margin-top: 15px;
 	margin-left: 7px;
 }
@@ -258,7 +258,7 @@
 	height: 17px;
 	cursor: pointer;
 	opacity: 0.5;
-	background: url(/images/minus.png);
+	background: url(images/minus.png);
 	margin-top: 5px;
 	margin-left: 7px;
 }
@@ -276,7 +276,7 @@
 .roomMapContentBlock .modemenu .selectmodemenu {
 	width: 63px;
 	height: 20px;
-	background: url(/images/selectmodemenu.png);
+	background: url(images/selectmodemenu.png);
 	position: absolute;
 	cursor: pointer;
 	margin-left: 10px;
@@ -287,14 +287,14 @@
 .roomMapContentBlock .modemenu .modemenubuttons .modeshow {
 	width: 43px;
 	height: 32px;
-	background: white url(/images/mode_show.png);
+	background: white url(images/mode_show.png);
 	display: inline-block;
 }
 
 .roomMapContentBlock .modemenu .modemenubuttons .modeedit {
 	width: 43px;
 	height: 32px;
-	background: white url(/images/mode_edit.png);
+	background: white url(images/mode_edit.png);
 	display: inline-block;
 }
 
@@ -460,7 +460,7 @@
 .roomMapContentBlock .blockSave .blockbuttons .loader {
 	width: 16px;
 	height: 16px;
-	background: url(/images/loader_small.gif) no-repeat;
+	background: url(images/loader_small.gif) no-repeat;
 	opacity: 0.2;
 	display: none;
 	margin: 3px 5px 3px 0px;
