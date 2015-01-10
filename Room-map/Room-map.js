@@ -8,7 +8,6 @@ var RoomMap = {
 	
 	//Инициализация карты
 	initMapTo: function (idElement){
-		RoomMap.idElement = idElement;
 		//Подключаем файлы
 		RoomMap.includeFiles();
 		//Ждем загрузки документа
@@ -20,15 +19,15 @@ var RoomMap = {
 				for(var i = 0; i < RoomMap.LoadMatrix.length; i++){
 					if(RoomMap.LoadMatrix[i] == 0) return;
 				}
-				RoomMap.$mapBlock = $('#' + idElement).addClass('roomMapContentBlock');
-				RoomMap.createMap();
+				RoomMap.createMap(idElement);
 				clearInterval(RoomMap.timeoutLoader);
 				RoomMap.timeoutLoader = null;
 			},100);
 		}
 	},
 
-	createMap: function(){
+	createMap: function(idElement){
+		RoomMap.$mapBlock = $('#' + idElement).addClass('roomMapContentBlock');
 		//Если на весь экран
 		if(RoomMap.fullScreen){
 			$('body').css({margin:'0px'});
