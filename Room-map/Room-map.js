@@ -72,11 +72,11 @@ var RoomMap = {
 				
 				//Сдвигаем фрагменты карт
 				RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
-					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').indexOf('svgobject') != -1){
-						if($(fragment).attr('class').indexOf('svgcircle') != -1){
+					if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
+						if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
 							fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
 							fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
-						}else if($(fragment).attr('class').indexOf('svgpolygon') != -1){
+						}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
 							//Для полигонов перебираем все точки
 							var newPoints = [];
 							for(i = 0; i < $(fragment).attr('points').length; i++){
@@ -154,7 +154,7 @@ var RoomMap = {
 		//Обновление координат при движении курсора по карте (в режиме редактирования)
 		$(RoomMap.$svg,RoomMap.$titlesvgblock).bind('mousemove',function(event){
 			if(!RoomMap.currentModeIsShowing()){
-				RoomMap.editor.updateCoor();
+				RoomMap.editor.updateCoor(event);
 			}
 		});
 
@@ -181,11 +181,11 @@ var RoomMap = {
 		RoomMap.$svg.bind('mousedown touchstart',RoomMap.scrollMap);
 		RoomMap.$svg.bind('mouseup touchend',RoomMap.scrollMapCancel);
 
-		//Обработчик прокрутки колесика (пока только для Chrome)
-		RoomMap.$svg.bind('wheel',function(){
-			if(RoomMap.currentModeIsShowing() && typeof event != 'undefined'){
+		//Обработчик прокрутки колесика
+		RoomMap.$svg.bind('wheel',function(event){
+			if(RoomMap.currentModeIsShowing()){
 				event.preventDefault();
-				RoomMap.selectScale(event);
+				RoomMap.selectScale(event.originalEvent);
 			}
 		});
 
@@ -281,21 +281,21 @@ var RoomMap = {
 			var $element = $(element);
 
 			//Не удаляем созданные объекты
-			if(!RoomMap.currentModeIsShowing() && $element.attr('class').indexOf('new') != -1){
+			if(!RoomMap.currentModeIsShowing() && $element.attr('class').baseVal.indexOf('new') != -1){
 				return;
 			}
 
 			//Удаление кругов
-			if($element.attr('class').indexOf('svgcircle') != -1){
-				var radius = $element.attr('r').value;
-				var cx = $element.attr('cx').value;
-				var cy = $element.attr('cy').value;
+			if($element.attr('class').baseVal.indexOf('svgcircle') != -1){
+				var radius = $element.attr('r').baseVal.value;
+				var cx = $element.attr('cx').baseVal.value;
+				var cy = $element.attr('cy').baseVal.value;
 				if((cx + radius) < 0 || (cx - radius) > RoomMap.mapWidth || (cy + radius) < 0 || (cy - radius) > RoomMap.mapHeight){
 					$element.remove();
 				}
 			}
 			//Удаление полигонов
-			else if($element.attr('class').indexOf('svgpolygon') != -1){
+			else if($element.attr('class').baseVal.indexOf('svgpolygon') != -1){
 				var min_x = min_y = max_x = max_y = 0;
 
 				for(var i = 0; i < $element.attr('points').length; i++){
@@ -378,19 +378,19 @@ var RoomMap = {
 			RoomMap.position_Y = RoomMap.position_Y - dY * RoomMap.scales[RoomMap.scale][0];
 			
 			RoomMap.$mapBlock.find('img,.svgobject').each(function(index,fragment){
-				if(typeof $(fragment).attr('class') != 'undefined' && $(fragment).attr('class').indexOf('svgobject') != -1){
-					if($(fragment).attr('class').indexOf('svgcircle') != -1){
+				if(typeof $(fragment).attr('class').baseVal != 'undefined' && $(fragment).attr('class').baseVal.indexOf('svgobject') != -1){
+					if($(fragment).attr('class').baseVal.indexOf('svgcircle') != -1){
 						fragment.setAttributeNS(null,'cx',parseInt(fragment.getAttribute('cx')) - dX);
 						fragment.setAttributeNS(null,'cy',parseInt(fragment.getAttribute('cy')) - dY);
-					}else if($(fragment).attr('class').indexOf('svgpolygon') != -1){
+					}else if($(fragment).attr('class').baseVal.indexOf('svgpolygon') != -1){
 						//Для полигонов перебираем все точки
 						var newPoints = [];
-						for(i = 0; i < fragment.points.length; i++){
-							var x = fragment.points[i].x - dX;
-							var y = fragment.points[i].y - dY
+						for(i = 0; i < $(fragment).attr('points').numberOfItems; i++){
+							var x = $(fragment).attr('points').getItem(i).x - dX;
+							var y = $(fragment).attr('points').getItem(i).y - dY
 							newPoints.push([x + ',' + y]);
 						}
-						
+						//alert($(fragment).attr('points'))
 						fragment.setAttributeNS(null,'points',newPoints.join(' '));
 					}
 				}else{

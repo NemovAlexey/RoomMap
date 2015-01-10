@@ -133,18 +133,19 @@ RoomMap.editor = {
 		RoomMap.editor.selectCurrentEditorTool();
 		//Клик на существующий объект
 		$('*',RoomMap.$svg).bind('dblclick.editor',function(){
-			if($(this).attr('class').indexOf('svgcircle') != -1){
+			if($(this).attr('class').baseVal.indexOf('svgcircle') != -1){
 				RoomMap.editor.createBlockPropertiesForCircle(this);
-			}else if($(this).attr('class').indexOf('svgpolygon') != -1){
+			}else if($(this).attr('class').baseVal.indexOf('svgpolygon') != -1){
 				RoomMap.editor.createBlockPropertiesForPoly(this);
 			}
 		});
 	},
 
 	//Обновление координат при движении курсора
-	updateCoor: function(){
-		RoomMap.editor.coor_x = (RoomMap.editor.getRealCoordinate('x',event.offsetX)).toFixed(2);
-		RoomMap.editor.coor_y = (RoomMap.editor.getRealCoordinate('y',event.offsetY)).toFixed(2);
+	updateCoor: function(event){
+		RoomMap.tex = event;
+		RoomMap.editor.coor_x = (RoomMap.editor.getRealCoordinate('x',event.originalEvent.offsetX)).toFixed(2);
+		RoomMap.editor.coor_y = (RoomMap.editor.getRealCoordinate('y',event.originalEvent.offsetY)).toFixed(2);
 		$('.coor_x',RoomMap.$CoorBlock).text(RoomMap.editor.coor_x);
 		$('.coor_y',RoomMap.$CoorBlock).text(RoomMap.editor.coor_y);
 	},
@@ -153,7 +154,7 @@ RoomMap.editor = {
 	createBlockPropertiesForCircle: function(object){
 		//Если объект существует, то заполняем данными
 		if(object != null){
-			object.setAttributeNS('','class',$(object).attr('class') + ' new');
+			object.setAttributeNS('','class',$(object).attr('class').baseVal + ' new');
 			var radius = object.r.baseVal.value * RoomMap.scales[RoomMap.scale][0];
 			var coor_x = RoomMap.editor.getRealCoordinate('x',object.cx.baseVal.value);
 			var coor_y = RoomMap.editor.getRealCoordinate('y',object.cy.baseVal.value);
@@ -196,10 +197,10 @@ RoomMap.editor = {
 		var input_points = '';
 		//Если объект существует, то заполняем данными
 		if(object != null){
-			object.setAttributeNS('','class',$(object).attr('class') + ' new');
-			var count_points = object.points.length;
+			object.setAttributeNS('','class',$(object).attr('class').baseVal + ' new');
+			var count_points = $(object).attr('points').numberOfItems;
 			for(var i = 1; i <= count_points; i++){
-				input_points += '<div class="pairs pair_' + i + '"><input type="text" class="objCoorX inp" value="' + RoomMap.editor.getRealCoordinate('x',object.points[i - 1].x) + '" title="' + RoomMap.Langs.coor_x + '" /><input type="text" class="objCoorY inp" value="' + RoomMap.editor.getRealCoordinate('y',object.points[i - 1].y) + '" title="' + RoomMap.Langs.coor_y + '" /> <span class="pointTitle">' + RoomMap.Langs.point + ' ' + i +  '</span> <span class="pointRemove" title="' + RoomMap.Langs.removepoint + '">X</span> <span class="pointAdd" title="' + (count_points == i ? RoomMap.Langs.addpoint : '') + '">' + (count_points == i ? '+' : '') + '</span></div>';
+				input_points += '<div class="pairs pair_' + i + '"><input type="text" class="objCoorX inp" value="' + RoomMap.editor.getRealCoordinate('x',$(object).attr('points').getItem([i - 1]).x) + '" title="' + RoomMap.Langs.coor_x + '" /><input type="text" class="objCoorY inp" value="' + RoomMap.editor.getRealCoordinate('y',$(object).attr('points').getItem([i - 1]).y) + '" title="' + RoomMap.Langs.coor_y + '" /> <span class="pointTitle">' + RoomMap.Langs.point + ' ' + i +  '</span> <span class="pointRemove" title="' + RoomMap.Langs.removepoint + '">X</span> <span class="pointAdd" title="' + (count_points == i ? RoomMap.Langs.addpoint : '') + '">' + (count_points == i ? '+' : '') + '</span></div>';
 			}
 			var editsvg = 1;
 		}
@@ -247,14 +248,14 @@ RoomMap.editor = {
 	//Создает обработчик сдвига блока свойств
 	AddDragEvent: function($dragArea){
 		$block = $dragArea.closest('.propBlock');
-		$dragArea.bind('mousedown',function(){
-			var offset_x = event.offsetX + RoomMap.$mapBlock.offset().left + 6;
-			var offset_y = event.offsetY + RoomMap.$mapBlock.offset().top + 6;
-			RoomMap.$mapBlock.bind('mousemove',function(){
+		$dragArea.bind('mousedown',function(event){
+			var offset_x = event.originalEvent.offsetX + RoomMap.$mapBlock.offset().left + 6;
+			var offset_y = event.originalEvent.offsetY + RoomMap.$mapBlock.offset().top + 6;
+			RoomMap.$mapBlock.bind('mousemove',function(event){
 				event.preventDefault();
-				if(event.clientX > offset_x && event.clientY > offset_y && event.clientX < RoomMap.mapWidth && event.clientY < RoomMap.mapHeight){
-					$block.css('left',event.clientX - offset_x);
-					$block.css('top',event.clientY - offset_y);
+				if(event.originalEvent.clientX > offset_x && event.originalEvent.clientY > offset_y && event.originalEvent.clientX < RoomMap.mapWidth && event.originalEvent.clientY < RoomMap.mapHeight){
+					$block.css('left',event.originalEvent.clientX - offset_x);
+					$block.css('top',event.originalEvent.clientY - offset_y);
 				}
 			});
 		});
@@ -292,7 +293,7 @@ RoomMap.editor = {
 	},
 	
 	//Обработчик нажатия на кнопку "создать"
-	ActionCreate: function(){
+	ActionCreate: function(event){
 		var $propBlock = RoomMap.editor.propblock;
 		$propBlock.find('.hidden_after_create').hide();
 		$propBlock.find('.show_after_create').show();
@@ -352,9 +353,9 @@ RoomMap.editor = {
 					}else{
 						var $obj = $(RoomMap.editor.propblock.data('obj'));
 						//Создаем новую точку и задаем координаты
-						$obj.get(0).points.appendItem(RoomMap.$svg.get(0).createSVGPoint());
-						$obj.get(0).points[RoomMap.editor.currentCreatePoint].x = click_x;
-						$obj.get(0).points[RoomMap.editor.currentCreatePoint].y = click_y;
+						$obj.attr('points').appendItem(RoomMap.$svg.get(0).createSVGPoint());
+						$obj.attr('points').getItem(RoomMap.editor.currentCreatePoint).x = click_x;
+						$obj.attr('points').getItem(RoomMap.editor.currentCreatePoint).y = click_y;
 					}
 					//Вставляем координаты в инпут
 					//Смотрим, есть ли блок с парой инпутов и создаем его если нет
@@ -425,17 +426,17 @@ RoomMap.editor = {
 	//Обновляет аттрибут points объекта полигон
 	updateAttributePoint: function(obj,num,axis,value){
 		if(obj == null) return;
-		obj.points[num-1][axis] = value;
+		$(obj).attr('points').getItem(num-1)[axis] = value;
 	},
 
 	//Изменение значений прокруткой колесика
 	scrollSet: function($selection){
 		$selection.hover(
-			function(){
-				$(this).bind('wheel',function(){
+			function(event){
+				$(this).bind('wheel',function(event){
 					event.stopPropagation();
 					event.preventDefault();
-					if(event.deltaY < 0){
+					if(event.originalEvent.deltaY < 0){
 						$(this).val(parseFloat($(this).val()) + RoomMap.scales[RoomMap.scale][0]);
 					}else{
 						$(this).val(parseFloat($(this).val()) - RoomMap.scales[RoomMap.scale][0]);
@@ -459,18 +460,18 @@ RoomMap.editor = {
 	addPoint: function(){
 		//Если полигон уже существует, добавляем инпуты и саму точку
 		if(RoomMap.editor.propblock.data('obj') != null){
-			var obj = RoomMap.editor.propblock.data('obj');
+			var $obj = $(RoomMap.editor.propblock.data('obj'));
 			//Если идет визуальное создание, увеличиваем счетчик
 			RoomMap.editor.currentCreatePoint += 1;
 			//Добавляем точку в svg
-			obj.points.appendItem(RoomMap.$svg.get(0).createSVGPoint());
+			$(RoomMap.editor.propblock.data('obj')).attr('points').appendItem(RoomMap.$svg.get(0).createSVGPoint());
 
 			//Корректируем положение точки (с небольшим смещением с вектора {X1:Xn})
-			var x = (obj.points[0].x + obj.points[RoomMap.editor.propblock.find('.pairs').length - 1].x)/2 + 5;
-			var y = (obj.points[0].y + obj.points[RoomMap.editor.propblock.find('.pairs').length - 1].y )/2 + 5;
+			var x = ($obj.attr('points').getItem(0).x + $obj.attr('points').getItem(RoomMap.editor.propblock.find('.pairs').length - 1).x)/2 + 5;
+			var y = ($obj.attr('points').getItem(0).y + $obj.attr('points').getItem(RoomMap.editor.propblock.find('.pairs').length - 1).y)/2 + 5;
 
-			obj.points[RoomMap.editor.propblock.find('.pairs').length].x = x;
-			obj.points[RoomMap.editor.propblock.find('.pairs').length].y = y;
+			$obj.attr('points').getItem(RoomMap.editor.propblock.find('.pairs').length).x = x;
+			$obj.attr('points').getItem(RoomMap.editor.propblock.find('.pairs').length).y = y;
 
 			//Добавляем инпут
 			RoomMap.editor.addInputForPoly(Math.ceil(RoomMap.mapWidth/2 - x - RoomMap.position_X/RoomMap.scales[RoomMap.scale][0]) * RoomMap.scales[RoomMap.scale][0] * -1,Math.ceil(RoomMap.mapHeight/2 - y + RoomMap.position_Y/RoomMap.scales[RoomMap.scale][0]) * RoomMap.scales[RoomMap.scale][0]);
@@ -590,7 +591,7 @@ RoomMap.editor = {
 		var max_x = 0;
 		var max_y = 0;
 		//Окружности
-		if($obj.attr('class').indexOf('svgcircle') != -1){
+		if($obj.attr('class').baseVal.indexOf('svgcircle') != -1){
 			params['r'] = parseInt(RoomMap.editor.propblock.find('.objRadius').val());
 			type = 'circle';
 			min_x = parseInt(RoomMap.editor.propblock.find('.objCoorX').val()) - params['r']/2;
@@ -599,7 +600,7 @@ RoomMap.editor = {
 			max_y = parseInt(RoomMap.editor.propblock.find('.objCoorY').val()) + params['r']/2;
 		}
 		//Полигоны
-		else if($obj.attr('class').indexOf('svgpolygon') != -1){
+		else if($obj.attr('class').baseVal.indexOf('svgpolygon') != -1){
 			params['points'] = [];
 			RoomMap.editor.propblock.find('.pairs').each(function(index,element){
 				var x = parseInt($(element).find('.objCoorX').val());
