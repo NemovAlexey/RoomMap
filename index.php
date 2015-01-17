@@ -8,7 +8,7 @@
 			RoomMap.position_X = <?= (float)$_GET['x']; ?>;
 			RoomMap.position_Y = <?= (float)$_GET['y']; ?>;
 			RoomMap.scale = <?= (int)$_GET['scale'] ?>;
-			RoomMap.layer = '<?= $_GET['layer'] ?>';
+			RoomMap.layer = '<?= preg_match('#^[a-z]+$#i',$_GET['layer']) ? $_GET['layer'] : '' ?>';
 			RoomMap.level = <?= (int)$_GET['level'] ?>;
 			RoomMap.editorMode = <?= (int)$_SESSION['editorMode'] ?>;
 			RoomMap.initMapTo('Room-map');

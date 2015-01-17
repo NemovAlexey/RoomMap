@@ -1,6 +1,6 @@
 //Размеры блока
-RoomMap.mapWidth = 1000;
-RoomMap.mapHeight = 500;
+RoomMap.mapWidth = 800;
+RoomMap.mapHeight = 400;
 
 //На весь экран
 RoomMap.fullScreen = false;
@@ -41,17 +41,20 @@ RoomMap.preventEscape = true;
 //Кнопки управления
 RoomMap.tools = true;
 
-//Путь к папке с фрагментами
-RoomMap.pathForFragments = '/maps';
-
 //Язык интерефейса
 RoomMap.lang = 'rus';
 
 //Обновлять ли URL при манипуляции картой
-RoomMap.urlupdate = false;
+RoomMap.urlupdate = true;
 
-//URL AJAX запросов
-RoomMap.ajaxUrl = '/Room-map/Room-map-remote.php';
+//Сервер, принимающий запросы 
+RoomMap.ajaxHost = '/';
+
+//Обработчик AJAX запросов
+RoomMap.ajaxRemote = RoomMap.ajaxHost + 'Room-map/Room-map-remote.php';
+
+//Путь к папке с фрагментами
+RoomMap.pathForFragments = RoomMap.ajaxHost + 'maps';
 
 //Параметры по умолчанию
 RoomMap.scaleDefault = 400;
@@ -65,3 +68,6 @@ RoomMap.level = RoomMap.level || RoomMap.levelDefault;
 
 //Режим редактирования
 RoomMap.editorMode = RoomMap.editorMode || false;
+
+//Блокировка контента c js кодом
+RoomMap.harmDetect = true;

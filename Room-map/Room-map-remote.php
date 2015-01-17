@@ -52,17 +52,17 @@ class RoomMapRemote {
 		return $object['description'];
 	}
 
-public function getSvgDataForEdit($id){
-	if(!$this->auth->UserIsEditor()) return 0;
+	public function getSvgDataForEdit($id){
+		if(!$this->auth->UserIsEditor()) return 0;
 
-	$query = "SELECT id as id_object,
-					title,
-					description
-				FROM objects WHERE id = ".$id;
+		$query = "SELECT id as id_object,
+						title,
+						description
+					FROM objects WHERE id = ".$id;
 
-	$data = $this->db->Query($query);
-	return $row = $data->Fetch(PDO::FETCH_ASSOC);
-}
+		$data = $this->db->Query($query);
+		return $row = $data->Fetch(PDO::FETCH_ASSOC);
+	}
 
 	public function saveData($dataArray){
 		if(!$this->auth->UserIsEditor()) return 0;
@@ -74,15 +74,13 @@ public function getSvgDataForEdit($id){
 			$id_layer = (int)$data->fetchColumn();
 
 			// Добавляем объект
-			$coords = json_decode($dataArray['coords'],1);
-			echo $query = "INSERT INTO objects (id,id_level,id_layer,min_x,min_y,max_x,max_y,title,description,content) VALUES (NULL,".$dataArray['level'].",".$id_layer.",".$coords['min_x'].",".$coords['min_y'].",".$coords['max_x'].",".$coords['max_y'].",'".$dataArray['title']."','".$dataArray['content']."','".$dataArray['object']."')";
+			echo $query = "INSERT INTO objects (id, id_level, id_layer, min_x, min_y, max_x, max_y, title, description, content) VALUES (NULL,".$dataArray['level'].",".$id_layer.",".$dataArray['coords']['min_x'].",".$dataArray['coords']['min_y'].",".$dataArray['coords']['max_x'].",".$dataArray['coords']['max_y'].",'".$dataArray['title']."','".$dataArray['content']."','".$dataArray['object']."')";
 			$this->db->Query($query);
 		}
 		// Редактирование существующего
 		else{
 			// Обновляем объект
-			$coords = json_decode($dataArray['coords'],1);
-			$query = "UPDATE objects SET content = '".$dataArray['object']."', min_x = '".$coords['min_x']."', min_y = '".$coords['min_y']."', max_x = '".$coords['max_x']."', max_y = '".$coords['max_y']."', title = '".$dataArray['title']."', description = '".$dataArray['content']."' WHERE id = ".$dataArray['id_obj'];
+			$query = "UPDATE objects SET content = '".$dataArray['object']."', min_x = '".$dataArray['coords']['min_x']."', min_y = '".$dataArray['coords']['min_y']."', max_x = '".$dataArray['coords']['max_x']."', max_y = '".$dataArray['coords']['max_y']."', title = '".$dataArray['title']."', description = '".$dataArray['content']."' WHERE id = ".$dataArray['id_obj'];
 			$this->db->Query($query);
 		}
 
@@ -99,6 +97,34 @@ class Authorization {
 	}
 }
 
+function prepareData($dataArray){
+	$slashes = array('content','title','layer','object');
+	$integer = array('level','id_obj');
+	$json = array('coords');
+
+	$queue_prepare = array('slashes', 'integer', 'json');
+	foreach($queue_prepare as $prepare_type){
+		foreach(${$prepare_type} as $param){
+			switch($prepare_type){
+				case 'slashes':
+					$dataArray[$param] = addslashes($dataArray[$param]);
+					break;
+				case 'integer':
+					$dataArray[$param] = (int)$dataArray[$param];
+					break;
+				case 'json':
+					$dataArray[$param] = json_decode($dataArray[$param],1);
+					if(!is_array($dataArray[$param])) exit;
+					foreach($dataArray[$param] as $key => $json_param){
+						$dataArray[$param][$key] = addslashes($json_param);
+					}
+					break;
+			}
+		}
+	}
+	return $dataArray;
+}
+
 
 $PDO = new PDO('mysql:dbname=RoomMap;host=127.0.0.1','root','');
 $PDO->Exec("SET NAMES utf8");
@@ -113,7 +139,7 @@ switch($_POST['data']){
 		echo json_encode(array('layers' => $RoomMapRemoteObj->getLayersList(), 'levels' => $RoomMapRemoteObj->getLevelsList()));
 		break;
 	case 'getsvg':
-		echo json_encode(array('svg' => $RoomMapRemoteObj->getListSVGObject($_POST['min_x'],$_POST['min_y'],$_POST['max_x'],$_POST['max_y'],$_POST['level'],$_POST['layer'])));
+		echo json_encode(array('svg' => $RoomMapRemoteObj->getListSVGObject((float)$_POST['min_x'],(float)$_POST['min_y'],(float)$_POST['max_x'],(float)$_POST['max_y'],(int)$_POST['level'],addslashes($_POST['layer']))));
 		break;
 	case 'getdetails':
 		echo json_encode(array('details' => $RoomMapRemoteObj->getSvgObjectDetails((int)$_POST['object_id'], (int)$_POST['level'])));
@@ -122,7 +148,7 @@ switch($_POST['data']){
 		echo json_encode($RoomMapRemoteObj->getSvgDataForEdit((int)$_POST['id']));
 		break;
 	case 'saveData':
-		echo $RoomMapRemoteObj->saveData($_POST);
+		echo $RoomMapRemoteObj->saveData(prepareData($_POST));
 		break;
 }
 

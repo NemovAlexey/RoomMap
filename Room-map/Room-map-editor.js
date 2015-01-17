@@ -622,7 +622,7 @@ RoomMap.editor = {
 		RoomMap.editor.saveBlock = $('<div class="blockSave"><div class="header">' + (RoomMap.editor.propblockisthere == 3 ? RoomMap.Langs.editobject + ' "' + title + '"' : RoomMap.Langs.createobject) + '</div><div class="blocktitle"><input placeholder="' + RoomMap.Langs.svgtitle + '" /></div><div class="blockdescription"><textarea placeholder="' + RoomMap.Langs.svgdescription + '"></textarea></div><div class="blockbuttons"><div class="savebutton">' + RoomMap.Langs.saveobject + '</div><div class="loader"></div></div></div>').appendTo(RoomMap.$mapBlock).animate({'opacity':1},100);
 		RoomMap.editor.saveBlock.data('object',object);
 		RoomMap.editor.saveBlock.data('coords',coords);
-		if(typeof $obj.attr('id') != 'undefined') RoomMap.editor.saveBlock.data('objid',$obj.attr('id').match(/([0-9]+)/)[1]);
+		if($obj.attr('id') != '') RoomMap.editor.saveBlock.data('objid',$obj.attr('id').match(/([0-9]+)/)[1]);
 		else RoomMap.editor.saveBlock.data('objid','');
 
 		RoomMap.editor.saveBlock.find('.savebutton').click(RoomMap.editor.saveData);
@@ -632,7 +632,7 @@ RoomMap.editor = {
 	loadSvgData: function($obj){
 		var id = $obj.attr('id').match(/svg([0-9]+)/)[1];
 		$.ajax({
-			url: RoomMap.ajaxUrl,
+			url: RoomMap.ajaxRemote,
 			type: 'post',
 			data: {
 				'data': 'getSvgDataForEdit',
@@ -653,7 +653,7 @@ RoomMap.editor = {
 		RoomMap.editor.saveBlock.addClass('saving');
 		//Отправка данных на сервер
 		$.ajax({
-			url: RoomMap.ajaxUrl,
+			url: RoomMap.ajaxRemote,
 			type: 'post',
 			data: {
 				'data': 'saveData',

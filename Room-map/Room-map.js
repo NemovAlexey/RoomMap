@@ -514,7 +514,7 @@ var RoomMap = {
 	//Загружает список доступных слоев, уровней
 	LoadLinks: function(){
 		$.ajax({
-			url: RoomMap.ajaxUrl,
+			url: RoomMap.ajaxRemote,
 			type: 'post',
 			data: {
 				'data': 'getlists'
@@ -533,7 +533,7 @@ var RoomMap = {
 	//Загружает SVG объекты
 	loadSvg: function(){
 		$.ajax({
-			url: RoomMap.ajaxUrl,
+			url: RoomMap.ajaxRemote,
 			type: 'post',
 			data: {
 				'data': 'getsvg',
@@ -609,7 +609,7 @@ var RoomMap = {
 		var id = $(this).attr('id').match(/svg([0-9]+)/)[1];
 
 		var ajax = $.ajax({
-			url: RoomMap.ajaxUrl,
+			url: RoomMap.ajaxRemote,
 			type: 'post',
 			dataType: 'json',
 			data: {
@@ -625,7 +625,7 @@ var RoomMap = {
 				}
 				else {
 					// Если обнаружены следы скрипта - удаляем содержимое
-					if(data.details.indexOf('<script') != -1) data.details = RoomMap.Langs.content_blocked;
+					if(RoomMap.harmDetector(data.details)) data.details = RoomMap.Langs.content_blocked;
 					// Показываем блок и выводим информацию
 					RoomMap.$svgDetailsBlock.find('.content').css('height','0px').html(data.details);
 					RoomMap.$svgDetailsBlock.fadeIn(100,function(){
@@ -857,5 +857,41 @@ var RoomMap = {
 	//Создает темный занавес
 	createDarkWall: function(){
 		return $('<div class="darkWall"></div>').css({width: RoomMap.mapWidth + 'px', height: RoomMap.mapHeight + 'px'}).appendTo(RoomMap.$mapBlock).animate({opacity: 0.8},100);
+	},
+
+	//Проверяет строку на исполнительный код
+	harmDetector: function(string){
+		if(!RoomMap.harmDetect) return false;
+		var arraySearch = ['<script',
+							'onclick',
+							'onmouseover',
+							'onmouseout',
+							'onunload',
+							'onsubmit',
+							'onselect',
+							'onresize',
+							'onreset',
+							'onmove',
+							'onmouseup',
+							'onmousedown',
+							'onload',
+							'onkeyup',
+							'onkeypress',
+							'onkeydown',
+							'onfocus',
+							'onerror',
+							'ondragdrop',
+							'ondblclick',
+							'onblur',
+							'onchange',
+							'text/javascript',
+							'document\\.',
+							'window\\.',
+							'location\\.']; 
+		for(var i = 0; i < arraySearch.length; i++){
+			if(new RegExp(arraySearch[i],'i').exec(string)) {return true};
+		}
+		
+		return false;
 	}
 }
