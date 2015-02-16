@@ -126,7 +126,7 @@ function prepareData($dataArray){
 }
 
 
-$PDO = new PDO('mysql:dbname=RoomMap;host=127.0.0.1','root','');
+$PDO = new PDO('mysql:dbname=roommap2;host=127.0.0.1','root','');
 $PDO->Exec("SET NAMES utf8");
 
 $AUTH = new Authorization();
